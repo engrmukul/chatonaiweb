@@ -39,10 +39,6 @@ export default function ReceiveQuickAns({ parentKey }) {
   );
   const promptGroupList = data?.payload;
 
-  // !---------
-  console.log("promptGroupList", promptGroupList);
-  // !---------
-
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading data: {error.message}</div>;
 

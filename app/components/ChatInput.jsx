@@ -22,10 +22,10 @@ const ChatInput = ({ onSend, searchParams }) => {
   const [message, setMessage] = useState(customPrompt || "");
 
   const { mutate } = usePostData(endpoints.createAI);
-  const { fileUpload } = usePostData(endpoints.fileUpload);
+  //! const { fileUpload } = usePostData(endpoints.fileUpload);
   const userToken = getJwtToken();
 
-  const [file, setFile] = useState(null);
+  //! const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
   const handleChange = (event) => {
@@ -33,49 +33,6 @@ const ChatInput = ({ onSend, searchParams }) => {
   };
 
   const handleSend = () => {
-    mutate(
-      {
-        data: {
-          customPrompt: message,
-          promptId: promptId,
-          // size: "512",
-          // size: "1024x1792", //For image
-          // stream: true,
-          stream: false,
-          voice: "alloy",
-          customFileUrl: "",
-        },
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      }
-      // {
-      //   onSuccess: (response) => {
-      //     // onSend("ME: " + customPrompt);
-      //     onSend("ME: " + message);
-
-      //     console.log(
-      //       "response.message.translate....",
-      //       response.message.translate
-      //     );
-      //     if (response.message.text) {
-      //       onSend("AI: " + response.message.text);
-      //     } else if (response.message.summeriz) {
-      //       onSend("AI: " + response.message.summeriz);
-      //     } else if (response.message.translate) {
-      //       onSend("AI: " + response.message.translate);
-      //     } else if (response.message.imageUrl) {
-      //       onSend("AI: " + response.message.imageUrl);
-      //     }
-      //   },
-      //   onError: (error) => {
-      //     // onSend("ME: " + customPrompt);
-      //     onSend("ME: " + message);
-      //     onSend("AI: " + error);
-      //   },
-      // }
-    );
-
     if (message.trim()) {
       onSend("ME: " + message);
       mutate(
@@ -98,11 +55,6 @@ const ChatInput = ({ onSend, searchParams }) => {
           onSuccess: (response) => {
             // onSend("ME: " + customPrompt);
             // onSend("ME: " + message);
-
-            console.log(
-              "response.message.translate....",
-              response.message.translate
-            );
             if (response.message.text) {
               onSend("AI: " + response.message.text);
             } else if (response.message.summeriz) {
