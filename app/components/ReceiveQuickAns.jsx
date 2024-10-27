@@ -23,6 +23,8 @@ export default function ReceiveQuickAns({ parentKey }) {
   //     router.push(`${basePath}/${id}`);
   //   };
   const handleNavigate = (id, promptData) => {
+    console.log("id, promptData", id, promptData);
+
     // Passing the ID and any prompt data as a query string
     const query = new URLSearchParams({
       id: id,
@@ -36,6 +38,10 @@ export default function ReceiveQuickAns({ parentKey }) {
     endpoints.promptsWithCategory
   );
   const promptGroupList = data?.payload;
+
+  // !---------
+  console.log("promptGroupList", promptGroupList);
+  // !---------
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading data: {error.message}</div>;

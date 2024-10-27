@@ -1,4 +1,5 @@
-const baseURL = "http://185.164.111.200:3001/";
+// const baseURL = "http://185.164.111.200:3001/";
+const baseURL = "http://localhost:3001/";
 
 export const endpoints = {
   // Auth
@@ -21,4 +22,6 @@ export const endpoints = {
 
   // all tags
   getAllTags: `api/prompt-tag?isActive=true&pageSize=0&pageNumber=1`,
+
+  fileUpload: `api/file-upload`,
 };

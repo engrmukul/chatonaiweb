@@ -125,7 +125,6 @@ export default function FreeAndPremiumItems() {
     free: [],
     paid: [],
   });
-
   const [selectedTag, setSelectedTag] = useState(null);
 
   const { data, isLoading, error } = useFetchData(endpoints.getAllPrompts);
@@ -191,7 +190,7 @@ export default function FreeAndPremiumItems() {
               //     })
               //   }
               onClick={() =>
-                handleNavigate(pack?.id, {
+                handleNavigate(pack?._id, {
                   prompt: pack?.prompt,
                 })
               }

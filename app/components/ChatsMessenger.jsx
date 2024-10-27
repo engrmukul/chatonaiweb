@@ -15,7 +15,7 @@ const Messenger = () => {
   const id = searchParams.get("id");
   const prompt = searchParams.get("prompt");
 
-  console.log("id", id, prompt);
+  // console.log("id", id, prompt);
 
   const router = useRouter();
   const [messages, setMessages] = useState([]);
@@ -36,7 +36,10 @@ const Messenger = () => {
   };
 
   function TextWithLineBreaks(props) {
-    const textWithBreaks = props.split("\n").map((text, index) => (
+    console.log(" props......2222222", props);
+    // const urlMatch = props.match(/https:\/\/[^"]+/);
+    // console.log("urlMatch......33333", props.match(/https:\/\/[^"]+/));
+    const textWithBreaks = props?.split("\n").map((text, index) => (
       <React.Fragment key={index}>
         {text}
         <br />
@@ -46,7 +49,7 @@ const Messenger = () => {
     return <div>{textWithBreaks}</div>;
   }
 
-  console.log("messages", messages);
+  // console.log("messages", messages);
 
   return (
     <>
@@ -73,8 +76,9 @@ const Messenger = () => {
             </Box>
 
             <Box className={"message-reply-history"}>
-              {messages.map((msg, index) =>
-                index % 2 === 0 ? (
+              {messages.map((msg, index) => {
+                const url = msg.match(/https:\/\/[^"]+/);
+                return index % 2 === 0 ? (
                   <div className="flex justify-end" key={index}>
                     <Typography
                       // key={index}
@@ -90,7 +94,7 @@ const Messenger = () => {
                       {TextWithLineBreaks(msg)}
                     </Typography>
                   </div>
-                ) : (
+                ) : !url ? (
                   <Typography
                     key={index}
                     variant="body1"
@@ -98,15 +102,18 @@ const Messenger = () => {
                   >
                     {TextWithLineBreaks(msg)}
                   </Typography>
-                  // <Typography
-                  //   key={index}
-                  //   variant="body1"
-                  //   sx={{ marginBottom: 1 }}
-                  // >
-                  //   {TextWithLineBreaks(msg)}
-                  // </Typography>
-                )
-              )}
+                ) : (
+                  <div key={index}>
+                    <a href={`${url ? url[0] : ""}`} target="_blank">
+                      <img
+                        src={url ? `${url[0]}` : ""}
+                        alt=""
+                        className="h-[400px] w-[500px]"
+                      />
+                    </a>
+                  </div>
+                );
+              })}
             </Box>
             <ChatInput onSend={handleSend} searchParams={searchParams} />
           </Box>
