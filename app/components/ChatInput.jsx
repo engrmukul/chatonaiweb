@@ -15,14 +15,16 @@ import { endpoints } from "../library/share/endpoints";
 import { getJwtToken } from "../library/functions";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CloseIcon from "@mui/icons-material/Close";
+import AiType from "./enums/AiTypeEnum";
 
 const ChatInput = ({ onSend, searchParams }) => {
   const customPrompt = searchParams.get("prompt");
   const promptId = searchParams.get("id");
+  const aiType = searchParams.get("type");
   const [message, setMessage] = useState(customPrompt || "");
 
   const { mutate } = usePostData(endpoints.createAI);
-  //! const { fileUpload } = usePostData(endpoints.fileUpload);
+  const { mutate: fileupload } = usePostData(endpoints.fileUpload);
   const userToken = getJwtToken();
 
   //! const [file, setFile] = useState(null);
@@ -32,47 +34,110 @@ const ChatInput = ({ onSend, searchParams }) => {
     setMessage(event.target.value);
   };
 
-  const handleSend = () => {
-    if (message.trim()) {
-      onSend("ME: " + message);
-      mutate(
-        {
-          data: {
-            customPrompt: message,
-            promptId: promptId,
-            // size: "512",
-            // size: "1024x1792", //For image
-            // stream: true,
-            stream: false,
-            voice: "alloy",
-            customFileUrl: "",
+  const handleSend = async () => {
+    if (aiType == AiType.IMAGETOTEXT) {
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        onSend("ME: " + message);
+        fileupload(
+          {
+            data: formData,
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+              "Content-Type": "multipart/form-data",
+            },
           },
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        },
-        {
-          onSuccess: (response) => {
-            // onSend("ME: " + customPrompt);
-            // onSend("ME: " + message);
-            if (response.message.text) {
-              onSend("AI: " + response.message.text);
-            } else if (response.message.summeriz) {
-              onSend("AI: " + response.message.summeriz);
-            } else if (response.message.translate) {
-              onSend("AI: " + response.message.translate);
-            } else if (response.message.imageUrl) {
-              onSend("AI: " + response.message.imageUrl);
+          {
+            onSuccess: (response) => {
+              setImagePreview(null);
+              mutate(
+                {
+                  data: {
+                    customPrompt: message,
+                    promptId: promptId,
+                    stream: false,
+                    voice: "alloy",
+                    customFileUrl: response.data.url,
+                  },
+                  headers: {
+                    Authorization: `Bearer ${userToken}`,
+                  },
+                },
+                {
+                  onSuccess: (response) => {
+                    if (response.message.text) {
+                      onSend("AI: " + response.message.text);
+                    } else if (response.message.summeriz) {
+                      onSend("AI: " + response.message.summeriz);
+                    } else if (response.message.translate) {
+                      onSend("AI: " + response.message.translate);
+                    } else if (response.message.imageUrl) {
+                      onSend("AI: " + response.message.imageUrl);
+                    }
+                  },
+                  onError: (error) => {
+                    // onSend("ME: " + customPrompt);
+                    // onSend("ME: " + message);
+                    onSend("AI: " + error);
+                  },
+                }
+              );
+              setMessage("");
+              // }
+            },
+            onError: (error) => {
+              console.log("file___ERROR", error);
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Error uploading file", error);
+      }
+    } else {
+      try {
+        if (message.trim()) {
+          onSend("ME: " + message);
+          mutate(
+            {
+              data: {
+                customPrompt: message,
+                promptId: promptId,
+                // size: "512",
+                // size: "1024x1792", //For image
+                // stream: true,
+                stream: false,
+                voice: "alloy",
+                customFileUrl: "",
+              },
+              headers: {
+                Authorization: `Bearer ${userToken}`,
+              },
+            },
+            {
+              onSuccess: (response) => {
+                if (response.message.text) {
+                  onSend("AI: " + response.message.text);
+                } else if (response.message.summeriz) {
+                  onSend("AI: " + response.message.summeriz);
+                } else if (response.message.translate) {
+                  onSend("AI: " + response.message.translate);
+                } else if (response.message.imageUrl) {
+                  onSend("AI: " + response.message.imageUrl);
+                }
+              },
+              onError: (error) => {
+                // onSend("ME: " + customPrompt);
+                // onSend("ME: " + message);
+                onSend("AI: " + error);
+              },
             }
-          },
-          onError: (error) => {
-            // onSend("ME: " + customPrompt);
-            // onSend("ME: " + message);
-            onSend("AI: " + error);
-          },
+          );
+          setMessage("");
         }
-      );
-      setMessage("");
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 
@@ -91,7 +156,6 @@ const ChatInput = ({ onSend, searchParams }) => {
     const file = event.target.files[0];
     if (file) {
       setFile(file);
-
       // Generate image preview if the file is an image
       if (file.type.startsWith("image/")) {
         const reader = new FileReader();
@@ -105,8 +169,10 @@ const ChatInput = ({ onSend, searchParams }) => {
     }
   };
 
+  console.log("file", file);
+
   const handleClosePreview = () => {
-    setFileName(""); // Clear the file name
+    setFile(null); // Clear the file name
     setImagePreview(null); // Remove the image preview
     document.getElementById("file-input").value = ""; // Reset file input
   };
@@ -126,13 +192,20 @@ const ChatInput = ({ onSend, searchParams }) => {
                 position: "absolute",
                 top: 5,
                 right: 5,
-                color: "red",
-                width: 2,
-                height: 2,
+                color: "white",
+                width: 15,
+                height: 15,
+                backgroundColor: "rgba(0,0,0, 0.5)",
               }}
               onClick={handleClosePreview}
             >
-              <CloseIcon fontSize="small" />
+              <CloseIcon
+                style={{
+                  width: 15,
+                  height: 15,
+                }}
+                fontSize="small"
+              />
             </IconButton>
             <img
               src={imagePreview}
@@ -143,8 +216,8 @@ const ChatInput = ({ onSend, searchParams }) => {
         </div>
       )}
       <TextField
-        multiline
-        rows={1}
+        // multiline
+        // rows={1}
         autoComplete="off"
         variant="outlined"
         fullWidth
