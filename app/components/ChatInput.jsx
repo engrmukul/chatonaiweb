@@ -16,6 +16,8 @@ import { getJwtToken } from "../library/functions";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CloseIcon from "@mui/icons-material/Close";
 import AiType from "./enums/AiTypeEnum";
+import { FaFile } from "react-icons/fa";
+import { FaRegFile } from "react-icons/fa6";
 
 const ChatInput = ({ onSend, searchParams }) => {
   const customPrompt = searchParams.get("prompt");
@@ -27,15 +29,16 @@ const ChatInput = ({ onSend, searchParams }) => {
   const { mutate: fileupload } = usePostData(endpoints.fileUpload);
   const userToken = getJwtToken();
 
-  //! const [file, setFile] = useState(null);
+  const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [fileIcon, setFileIcon] = useState(false);
 
   const handleChange = (event) => {
     setMessage(event.target.value);
   };
 
   const handleSend = async () => {
-    if (aiType == AiType.IMAGETOTEXT) {
+    if (aiType == AiType.IMAGETOTEXT || aiType == AiType.FILES) {
       const formData = new FormData();
       formData.append("file", file);
       try {
@@ -50,7 +53,9 @@ const ChatInput = ({ onSend, searchParams }) => {
           },
           {
             onSuccess: (response) => {
-              setImagePreview(null);
+              setImagePreview(null); //Removing file after upload
+              setFileIcon(false);
+              setFile(null); //Removing file after upload
               mutate(
                 {
                   data: {
@@ -58,7 +63,10 @@ const ChatInput = ({ onSend, searchParams }) => {
                     promptId: promptId,
                     stream: false,
                     voice: "alloy",
-                    customFileUrl: response.data.url,
+                    customFileUrl:
+                      aiType == AiType.FILES
+                        ? response.data.filename
+                        : response.data.url,
                   },
                   headers: {
                     Authorization: `Bearer ${userToken}`,
@@ -165,11 +173,13 @@ const ChatInput = ({ onSend, searchParams }) => {
         reader.readAsDataURL(file);
       } else {
         setImagePreview(null); // Clear preview if not an image
+        setFileIcon(true);
       }
     }
   };
 
   const handleClosePreview = () => {
+    setFileIcon(false);
     setFile(null); // Clear the file name
     setImagePreview(null); // Remove the image preview
     document.getElementById("file-input").value = ""; // Reset file input
@@ -178,7 +188,7 @@ const ChatInput = ({ onSend, searchParams }) => {
   return (
     <Box className={"message-input relative"}>
       {/* Image preview */}
-      {imagePreview && (
+      {(imagePreview || fileIcon) && (
         <div className=" absolute bottom-full">
           <div
             // style={{ marginTop: 10, textAlign: "center", position: "relative" }}
@@ -205,11 +215,15 @@ const ChatInput = ({ onSend, searchParams }) => {
                 fontSize="small"
               />
             </IconButton>
-            <img
-              src={imagePreview}
-              alt="Preview"
-              style={{ maxWidth: "100%", maxHeight: 50, borderRadius: 8 }}
-            />
+            {imagePreview ? (
+              <img
+                src={imagePreview}
+                alt="Preview"
+                style={{ maxWidth: "100%", maxHeight: 50, borderRadius: 8 }}
+              />
+            ) : (
+              <FaRegFile size={50} color="green" />
+            )}
           </div>
         </div>
       )}
@@ -258,7 +272,9 @@ const ChatInput = ({ onSend, searchParams }) => {
       <input
         id="file-input"
         type="file"
-        accept="image/*,application/pdf"
+        accept={
+          aiType == AiType.FILES ? "application/pdf, .doc, .docx" : "image/*"
+        }
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
