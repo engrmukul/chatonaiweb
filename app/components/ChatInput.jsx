@@ -169,8 +169,6 @@ const ChatInput = ({ onSend, searchParams }) => {
     }
   };
 
-  console.log("file", file);
-
   const handleClosePreview = () => {
     setFile(null); // Clear the file name
     setImagePreview(null); // Remove the image preview
