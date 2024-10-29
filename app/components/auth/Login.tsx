@@ -25,7 +25,10 @@ export default function Login() {
   const handleLogin = async (data: FormData) => {
     try {
       console.log("hello");
-      // const response = await axios.post('http://185.164.111.200:3001/api/auth/signin', data);
+      // const response = await axios.post(
+      //   "http://185.164.111.200:3001/api/auth/signin",
+      //   data
+      // );
       const response = await axios.post(
         "http://localhost:3001/api/auth/signin",
         data

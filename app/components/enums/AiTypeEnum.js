@@ -1,0 +1,13 @@
+ const AIType = {
+    COMPLETIONS : 'COMPLETIONS',  
+    IMAGES : 'IMAGES',
+    AUDIO : 'AUDIO',
+    TRANSCRIPTION : 'TRANSCRIPTION',
+    IMAGETOTEXT : 'IMAGETOTEXT', 
+    SUMMARIZATION : 'SUMMARIZATION',
+    TRANSLATION : 'TRANSLATION',
+    FILES : 'FILES',
+  }
+
+  export default AIType;
+   

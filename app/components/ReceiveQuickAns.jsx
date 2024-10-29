@@ -29,6 +29,7 @@ export default function ReceiveQuickAns({ parentKey }) {
     const query = new URLSearchParams({
       id: id,
       prompt: promptData.prompt,
+      type: promptData.aiType,
     }).toString();
     router.push(`${basePath}/${id}?${query}`);
     setSelectedTag(promptData.id);
@@ -71,10 +72,11 @@ export default function ReceiveQuickAns({ parentKey }) {
                   // }
                   //   onClick={() => handleNavigate(prompt?._id)}
                   onClick={() =>
-                    handleNavigate(prompt?._id, {
-                      prompt: prompt?.prompt,
+                    handleNavigate(
+                      prompt?._id,
+                      prompt
                       // category: group?.categoryTitle,
-                    })
+                    )
                   }
                 />
               </Stack>
