@@ -18,6 +18,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import AiType from "./enums/AiTypeEnum";
 import { FaFile } from "react-icons/fa";
 import { FaRegFile } from "react-icons/fa6";
+import VoiceToText from "./VoiceToText";
 
 const ChatInput = ({ onSend, searchParams }) => {
   const customPrompt = searchParams.get("prompt");
@@ -186,99 +187,101 @@ const ChatInput = ({ onSend, searchParams }) => {
   };
 
   return (
-    <Box className={"message-input relative"}>
-      {/* Image preview */}
-      {(imagePreview || fileIcon) && (
-        <div className=" absolute bottom-full">
-          <div
-            // style={{ marginTop: 10, textAlign: "center", position: "relative" }}
-            className=" relative"
-          >
-            <IconButton
-              size="small"
-              style={{
-                position: "absolute",
-                top: 5,
-                right: 5,
-                color: "white",
-                width: 15,
-                height: 15,
-                backgroundColor: "rgba(0,0,0, 0.5)",
-              }}
-              onClick={handleClosePreview}
-            >
-              <CloseIcon
-                style={{
-                  width: 15,
-                  height: 15,
-                }}
-                fontSize="small"
-              />
-            </IconButton>
-            {imagePreview ? (
-              <img
-                src={imagePreview}
-                alt="Preview"
-                style={{ maxWidth: "100%", maxHeight: 50, borderRadius: 8 }}
-              />
-            ) : (
-              <FaRegFile size={50} color="green" />
-            )}
-          </div>
-        </div>
-      )}
-      <TextField
-        // multiline
-        // rows={1}
-        autoComplete="off"
-        variant="outlined"
-        fullWidth
-        // defaultValue={prompt}
-        value={message}
-        onChange={handleChange}
-        onKeyDown={handleKeyPress}
-        placeholder="Type your message here..."
-        sx={{
-          "& .MuiInputBase-input": {
-            paddingLeft: "8px", // Add left padding here
-          },
-          "& .MuiInputBase-root": {
-            backgroundColor: "#08151F", // Set to desired background color
-            color: "white", // Set to desired text color
-          },
-        }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <IconButton
-                edge="start"
-                color="primary"
-                onClick={handleAttachFileClick}
-              >
-                <AttachFileIcon />
-              </IconButton>
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton edge="end" color="primary" onClick={handleSend}>
-                <SendIcon />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
-      {/* Hidden file input */}
-      <input
-        id="file-input"
-        type="file"
-        accept={
-          aiType == AiType.FILES ? "application/pdf, .doc, .docx" : "image/*"
-        }
-        style={{ display: "none" }}
-        onChange={handleFileChange}
-      />
-    </Box>
+    // <Box className={"message-input relative"}>
+    //   {/* Image preview */}
+    //   {(imagePreview || fileIcon) && (
+    //     <div className=" absolute bottom-full">
+    //       <div
+    //         // style={{ marginTop: 10, textAlign: "center", position: "relative" }}
+    //         className=" relative"
+    //       >
+    //         <IconButton
+    //           size="small"
+    //           style={{
+    //             position: "absolute",
+    //             top: 5,
+    //             right: 5,
+    //             color: "white",
+    //             width: 15,
+    //             height: 15,
+    //             backgroundColor: "rgba(0,0,0, 0.5)",
+    //           }}
+    //           onClick={handleClosePreview}
+    //         >
+    //           <CloseIcon
+    //             style={{
+    //               width: 15,
+    //               height: 15,
+    //             }}
+    //             fontSize="small"
+    //           />
+    //         </IconButton>
+    //         {imagePreview ? (
+    //           <img
+    //             src={imagePreview}
+    //             alt="Preview"
+    //             style={{ maxWidth: "100%", maxHeight: 50, borderRadius: 8 }}
+    //           />
+    //         ) : (
+    //           <FaRegFile size={50} color="green" />
+    //         )}
+    //       </div>
+    //     </div>
+    //   )}
+    //   <TextField
+    //     // multiline
+    //     // rows={1}
+    //     autoComplete="off"
+    //     variant="outlined"
+    //     fullWidth
+    //     // defaultValue={prompt}
+    //     value={message}
+    //     onChange={handleChange}
+    //     onKeyDown={handleKeyPress}
+    //     placeholder="Type your message here..."
+    //     sx={{
+    //       "& .MuiInputBase-input": {
+    //         paddingLeft: "8px", // Add left padding here
+    //       },
+    //       "& .MuiInputBase-root": {
+    //         backgroundColor: "#08151F", // Set to desired background color
+    //         color: "white", // Set to desired text color
+    //       },
+    //     }}
+    //     InputProps={{
+    //       startAdornment: (aiType == AiType.IMAGETOTEXT ||
+    //         aiType == AiType.FILES) && (
+    //         <InputAdornment position="start">
+    //           <IconButton
+    //             edge="start"
+    //             color="primary"
+    //             onClick={handleAttachFileClick}
+    //           >
+    //             <AttachFileIcon />
+    //           </IconButton>
+    //         </InputAdornment>
+    //       ),
+    //       endAdornment: (
+    //         <InputAdornment position="end">
+    //           <IconButton edge="end" color="primary" onClick={handleSend}>
+    //             <SendIcon />
+    //           </IconButton>
+    //         </InputAdornment>
+    //       ),
+    //     }}
+    //   />
+    //   {/* Hidden file input */}
+    //   <input
+    //     id="file-input"
+    //     type="file"
+    //     accept={
+    //       aiType == AiType.FILES ? "application/pdf, .doc, .docx" : "image/*"
+    //     }
+    //     style={{ display: "none" }}
+    //     onChange={handleFileChange}
+    //   />
+    // </Box>
+    <VoiceToText />
   );
 };
 
