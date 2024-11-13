@@ -65,16 +65,16 @@ const VoiceToText = () => {
     recognition.stop();
   };
 
-  return (
-    <div className=" bg-gray-300">
-      <h1>Voice to Text Converter</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <button onClick={isListening ? stopListening : startListening}>
-        {isListening ? "Stop" : "Start"} Listening
-      </button>
-      <p>{transcript}</p>
-    </div>
-  );
+  // return (
+  //   <div className=" bg-gray-300">
+  //     <h1>Voice to Text Converter</h1>
+  //     {error && <p style={{ color: "red" }}>{error}</p>}
+  //     <button onClick={isListening ? stopListening : startListening}>
+  //       {isListening ? "Stop" : "Start"} Listening
+  //     </button>
+  //     <p>{transcript}</p>
+  //   </div>
+  // );
 };
 
 export default VoiceToText;

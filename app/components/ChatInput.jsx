@@ -18,7 +18,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import AiType from "./enums/AiTypeEnum";
 import { FaFile } from "react-icons/fa";
 import { FaRegFile } from "react-icons/fa6";
-import VoiceToText from "./VoiceToText";
+import { IoMdMic } from "react-icons/io";
+import { IoMdMicOff } from "react-icons/io";
+// import MicIcon from "@material-ui/icons/Mic";
+// import MicOffIcon from "@material-ui/icons/MicOff";
 
 const ChatInput = ({ onSend, searchParams }) => {
   const customPrompt = searchParams.get("prompt");
@@ -186,102 +189,217 @@ const ChatInput = ({ onSend, searchParams }) => {
     document.getElementById("file-input").value = ""; // Reset file input
   };
 
+  // !!!Voice to text-------
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [error, setError] = useState("");
+
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+  //   useEffect(() => {
+  //     if (!recognition) {
+  //       setError("Speech Recognition API is not supported in this browser.");
+  //       return;
+  //     }
+
+  // Configure recognition settings
+  recognition.continuous = true; // Keep listening even with pauses
+  recognition.interimResults = true;
+  // recognition.maxAlternatives = 1;
+  recognition.lang = "en-US";
+
+  // Handle results
+  recognition.onresult = (event) => {
+    console.log("Recognition result event:", event);
+    const currentTranscript = Array.from(event.results)
+      .map((result) => result[0].transcript)
+      .join("");
+    //   setTranscript(
+    //     (prevTranscript) => prevTranscript + " " + currentTranscript
+    //   );
+    // setTranscript(currentTranscript);
+    setMessage(currentTranscript);
+  };
+
+  // Restart recognition if it stops unexpectedly
+  //   recognition.onend = () => {
+  //     console.log("Recognition ended");
+  //     if (isListening) {
+  //       recognition.start();
+  //     }
+  //   };
+
+  recognition.onerror = (event) => {
+    console.error("Speech recognition error:", event.error);
+    setError("Speech recognition error: " + event.error);
+    setIsListening(false);
+  };
+
+  recognition.onend = () => {
+    console.log("Recognition has stopped.");
+    // setIsListening(false); // Confirm stopped state here
+  };
+
+  //   return () => {
+  //     recognition.stop();
+  //   };
+  //   }, [isListening, recognition]);
+
+  const startListening = () => {
+    if (recognition) {
+      console.log("Starting recognition");
+      setIsListening(true);
+      recognition.start();
+    }
+  };
+
+  const stopListening = () => {
+    console.log("Stopping recognition");
+    setIsListening(false);
+    recognition.stop();
+  };
+
+  // return (
+  //   <div className=" bg-gray-300">
+  //     <h1>Voice to Text Converter</h1>
+  //     {error && <p style={{ color: "red" }}>{error}</p>}
+  //     <button onClick={isListening ? stopListening : startListening}>
+  //       {isListening ? "Stop" : "Start"} Listening
+  //     </button>
+  //     <p>{transcript}</p>
+  //   </div>
+  // );
+  // !!!Voice to text-------
+
   return (
-    // <Box className={"message-input relative"}>
-    //   {/* Image preview */}
-    //   {(imagePreview || fileIcon) && (
-    //     <div className=" absolute bottom-full">
-    //       <div
-    //         // style={{ marginTop: 10, textAlign: "center", position: "relative" }}
-    //         className=" relative"
-    //       >
-    //         <IconButton
-    //           size="small"
-    //           style={{
-    //             position: "absolute",
-    //             top: 5,
-    //             right: 5,
-    //             color: "white",
-    //             width: 15,
-    //             height: 15,
-    //             backgroundColor: "rgba(0,0,0, 0.5)",
-    //           }}
-    //           onClick={handleClosePreview}
-    //         >
-    //           <CloseIcon
-    //             style={{
-    //               width: 15,
-    //               height: 15,
-    //             }}
-    //             fontSize="small"
-    //           />
-    //         </IconButton>
-    //         {imagePreview ? (
-    //           <img
-    //             src={imagePreview}
-    //             alt="Preview"
-    //             style={{ maxWidth: "100%", maxHeight: 50, borderRadius: 8 }}
-    //           />
-    //         ) : (
-    //           <FaRegFile size={50} color="green" />
-    //         )}
-    //       </div>
-    //     </div>
-    //   )}
-    //   <TextField
-    //     // multiline
-    //     // rows={1}
-    //     autoComplete="off"
-    //     variant="outlined"
-    //     fullWidth
-    //     // defaultValue={prompt}
-    //     value={message}
-    //     onChange={handleChange}
-    //     onKeyDown={handleKeyPress}
-    //     placeholder="Type your message here..."
-    //     sx={{
-    //       "& .MuiInputBase-input": {
-    //         paddingLeft: "8px", // Add left padding here
-    //       },
-    //       "& .MuiInputBase-root": {
-    //         backgroundColor: "#08151F", // Set to desired background color
-    //         color: "white", // Set to desired text color
-    //       },
-    //     }}
-    //     InputProps={{
-    //       startAdornment: (aiType == AiType.IMAGETOTEXT ||
-    //         aiType == AiType.FILES) && (
-    //         <InputAdornment position="start">
-    //           <IconButton
-    //             edge="start"
-    //             color="primary"
-    //             onClick={handleAttachFileClick}
-    //           >
-    //             <AttachFileIcon />
-    //           </IconButton>
-    //         </InputAdornment>
-    //       ),
-    //       endAdornment: (
-    //         <InputAdornment position="end">
-    //           <IconButton edge="end" color="primary" onClick={handleSend}>
-    //             <SendIcon />
-    //           </IconButton>
-    //         </InputAdornment>
-    //       ),
-    //     }}
-    //   />
-    //   {/* Hidden file input */}
-    //   <input
-    //     id="file-input"
-    //     type="file"
-    //     accept={
-    //       aiType == AiType.FILES ? "application/pdf, .doc, .docx" : "image/*"
-    //     }
-    //     style={{ display: "none" }}
-    //     onChange={handleFileChange}
-    //   />
-    // </Box>
-    <VoiceToText />
+    <Box className={"message-input relative"}>
+      {/* Image preview */}
+      {(imagePreview || fileIcon) && (
+        <div className=" absolute bottom-full">
+          <div
+            // style={{ marginTop: 10, textAlign: "center", position: "relative" }}
+            className=" relative"
+          >
+            <IconButton
+              size="small"
+              style={{
+                position: "absolute",
+                top: 5,
+                right: 5,
+                color: "white",
+                width: 15,
+                height: 15,
+                backgroundColor: "rgba(0,0,0, 0.5)",
+              }}
+              onClick={handleClosePreview}
+            >
+              <CloseIcon
+                style={{
+                  width: 15,
+                  height: 15,
+                }}
+                fontSize="small"
+              />
+            </IconButton>
+            {imagePreview ? (
+              <img
+                src={imagePreview}
+                alt="Preview"
+                style={{ maxWidth: "100%", maxHeight: 50, borderRadius: 8 }}
+              />
+            ) : (
+              <FaRegFile size={50} color="green" />
+            )}
+          </div>
+        </div>
+      )}
+      <TextField
+        // multiline
+        // rows={1}
+        autoComplete="off"
+        variant="outlined"
+        fullWidth
+        // defaultValue={prompt}
+        value={message}
+        onChange={handleChange}
+        onKeyDown={handleKeyPress}
+        placeholder="Type your message here..."
+        sx={{
+          "& .MuiInputBase-input": {
+            paddingLeft: "8px", // Add left padding here
+          },
+          "& .MuiInputBase-root": {
+            backgroundColor: "#08151F", // Set to desired background color
+            color: "white", // Set to desired text color
+          },
+        }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              {(aiType === AiType.IMAGETOTEXT || aiType === AiType.FILES) && (
+                <IconButton
+                  edge="start"
+                  color="primary"
+                  onClick={handleAttachFileClick}
+                >
+                  <AttachFileIcon />
+                </IconButton>
+              )}
+            </InputAdornment>
+          ),
+
+          // startAdornment: (aiType == AiType.IMAGETOTEXT ||
+          //   aiType == AiType.FILES) && (
+          //   <InputAdornment position="start">
+          //     <IconButton
+          //       edge="start"
+          //       color="primary"
+          //       onClick={handleAttachFileClick}
+          //     >
+          //       <AttachFileIcon />
+          //     </IconButton>
+          //   </InputAdornment>
+          // ),
+          endAdornment: (
+            <InputAdornment position="end">
+              {!isListening ? (
+                <IconButton
+                  edge="start"
+                  color="primary"
+                  onClick={() => startListening()}
+                >
+                  <IoMdMic />
+                </IconButton>
+              ) : (
+                <IconButton
+                  edge="start"
+                  color="primary"
+                  onClick={() => stopListening()}
+                >
+                  <IoMdMicOff />
+                </IconButton>
+              )}
+              <IconButton edge="end" color="primary" onClick={handleSend}>
+                <SendIcon />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+      {/* Hidden file input */}
+      <input
+        id="file-input"
+        type="file"
+        accept={
+          aiType == AiType.FILES ? "application/pdf, .doc, .docx" : "image/*"
+        }
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
+    </Box>
+    // <VoiceToText />
   );
 };
 
