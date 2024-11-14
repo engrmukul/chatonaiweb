@@ -42,7 +42,11 @@ const ChatInput = ({ onSend, searchParams }) => {
   };
 
   const handleSend = async () => {
-    if (aiType == AiType.IMAGETOTEXT || aiType == AiType.FILES) {
+    if (
+      aiType == AiType.IMAGETOTEXT ||
+      aiType == AiType.FILES ||
+      aiType == AiType.TRANSLATION
+    ) {
       const formData = new FormData();
       formData.append("file", file);
       try {
@@ -205,9 +209,8 @@ const ChatInput = ({ onSend, searchParams }) => {
   //     }
 
   // Configure recognition settings
-  recognition.continuous = true; // Keep listening even with pauses
+  // recognition.continuous = true; // Keep listening even with pauses
   recognition.interimResults = true;
-  // recognition.maxAlternatives = 1;
   recognition.lang = "en-US";
 
   // Handle results
@@ -232,15 +235,17 @@ const ChatInput = ({ onSend, searchParams }) => {
   //   };
 
   recognition.onerror = (event) => {
-    console.error("Speech recognition error:", event.error);
-    setError("Speech recognition error: " + event.error);
     setIsListening(false);
+    console.error("Speech recognition error:", event.error);
+    // setError("Speech recognition error: " + event.error);
   };
 
-  recognition.onend = () => {
-    console.log("Recognition has stopped.");
-    // setIsListening(false); // Confirm stopped state here
-  };
+  // recognition.addEventListener("end", recognition.start);
+
+  // recognition.onend = () => {
+  //   setIsListening(false); // Confirm stopped state here
+  //   console.log("Recognition has stopped.");
+  // };
 
   //   return () => {
   //     recognition.stop();
@@ -338,7 +343,9 @@ const ChatInput = ({ onSend, searchParams }) => {
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              {(aiType === AiType.IMAGETOTEXT || aiType === AiType.FILES) && (
+              {(aiType === AiType.IMAGETOTEXT ||
+                aiType === AiType.FILES ||
+                aiType === AiType.TRANSLATION) && (
                 <IconButton
                   edge="start"
                   color="primary"
