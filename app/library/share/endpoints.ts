@@ -1,5 +1,5 @@
-// const baseURL = "http://185.164.111.200:3001/";
-const baseURL = "http://localhost:3001/";
+const baseURL = "http://185.164.111.200:3001/";
+// const baseURL = "http://localhost:3001/";
 
 export const endpoints = {
   // Auth

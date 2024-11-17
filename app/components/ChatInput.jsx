@@ -1,5 +1,5 @@
 // src/ChatInput.js
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -20,6 +20,7 @@ import { FaFile } from "react-icons/fa";
 import { FaRegFile } from "react-icons/fa6";
 import { IoMdMic } from "react-icons/io";
 import { IoMdMicOff } from "react-icons/io";
+import useFetchData from "../library/hooks/useFetchData";
 // import MicIcon from "@material-ui/icons/Mic";
 // import MicOffIcon from "@material-ui/icons/MicOff";
 
@@ -37,20 +38,53 @@ const ChatInput = ({ onSend, searchParams }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [fileIcon, setFileIcon] = useState(false);
 
+  //!--------------------------
+  const [packages, setPackages] = useState({
+    free: [],
+    paid: [],
+  });
+  const { data, isLoading } = useFetchData(endpoints.getAllPrompts);
+
+  useEffect(() => {
+    if (data?.data) {
+      const freePackages = [];
+      const paidPackages = [];
+
+      data?.data.forEach((item) => {
+        if (item.packageType === "FREE") {
+          freePackages.push(item);
+        } else if (item.packageType === "PAID") {
+          paidPackages.push(item);
+        }
+      });
+
+      setPackages({ free: freePackages, paid: paidPackages });
+    }
+  }, [data]);
+
+  const ImageToTextPromt = packages.paid.find(
+    (item) => item.aiType == AiType.IMAGETOTEXT
+  );
+
+  console.log("ImageToTextPromt", packages);
+  //!--------------------------
+
   const handleChange = (event) => {
     setMessage(event.target.value);
   };
 
-  const handleSend = async () => {
+  const handleSend = async (isSecondCall, processedMessage = "") => {
+    console.log("isSecondCall.....", isSecondCall);
     if (
       aiType == AiType.IMAGETOTEXT ||
       aiType == AiType.FILES ||
-      aiType == AiType.TRANSLATION
+      (aiType == AiType.TRANSLATION && file != null && !isSecondCall) ||
+      (aiType == AiType.SUMMARIZATION && file != null && !isSecondCall)
     ) {
       const formData = new FormData();
       formData.append("file", file);
       try {
-        onSend("ME: " + message);
+        onSend({ type: "sent", text: message });
         fileupload(
           {
             data: formData,
@@ -67,8 +101,16 @@ const ChatInput = ({ onSend, searchParams }) => {
               mutate(
                 {
                   data: {
-                    customPrompt: message,
-                    promptId: promptId,
+                    customPrompt:
+                      aiType == AiType.TRANSLATION ||
+                      aiType == AiType.SUMMARIZATION
+                        ? ImageToTextPromt.prompt
+                        : message,
+                    promptId:
+                      aiType == AiType.TRANSLATION ||
+                      aiType == AiType.SUMMARIZATION
+                        ? ImageToTextPromt._id
+                        : promptId,
                     stream: false,
                     voice: "alloy",
                     customFileUrl:
@@ -82,20 +124,40 @@ const ChatInput = ({ onSend, searchParams }) => {
                 },
                 {
                   onSuccess: (response) => {
-                    if (response.message.text) {
-                      onSend("AI: " + response.message.text);
+                    if (
+                      (aiType == AiType.TRANSLATION ||
+                        aiType == AiType.SUMMARIZATION) &&
+                      response.message.text
+                    ) {
+                      setMessage(response.message.text);
+                      handleSend(true, response.message.text);
+                    } else if (response.message.text) {
+                      onSend({ type: "recieved", text: response.message.text });
                     } else if (response.message.summeriz) {
-                      onSend("AI: " + response.message.summeriz);
+                      // onSend("AI: " + response.message.summeriz);
+                      onSend({
+                        type: "recieved",
+                        text: response.message.summeriz,
+                      });
                     } else if (response.message.translate) {
-                      onSend("AI: " + response.message.translate);
+                      // onSend("AI: " + response.message.translate);
+                      onSend({
+                        type: "recieved",
+                        text: response.message.translate,
+                      });
                     } else if (response.message.imageUrl) {
-                      onSend("AI: " + response.message.imageUrl);
+                      // onSend("AI: " + response.message.imageUrl);
+                      onSend({
+                        type: "recieved",
+                        text: response.message.imageUrl,
+                      });
                     }
                   },
                   onError: (error) => {
                     // onSend("ME: " + customPrompt);
                     // onSend("ME: " + message);
-                    onSend("AI: " + error);
+                    // onSend("AI: " + error);
+                    onSend({ type: "recieved", text: error });
                   },
                 }
               );
@@ -113,11 +175,11 @@ const ChatInput = ({ onSend, searchParams }) => {
     } else {
       try {
         if (message.trim()) {
-          onSend("ME: " + message);
+          !isSecondCall && onSend({ type: "sent", text: message });
           mutate(
             {
               data: {
-                customPrompt: message,
+                customPrompt: message + `${processedMessage}`,
                 promptId: promptId,
                 // size: "512",
                 // size: "1024x1792", //For image
@@ -133,19 +195,23 @@ const ChatInput = ({ onSend, searchParams }) => {
             {
               onSuccess: (response) => {
                 if (response.message.text) {
-                  onSend("AI: " + response.message.text);
+                  onSend({ type: "recieved", text: response.message.text });
                 } else if (response.message.summeriz) {
-                  onSend("AI: " + response.message.summeriz);
+                  onSend({ type: "recieved", text: response.message.summeriz });
                 } else if (response.message.translate) {
-                  onSend("AI: " + response.message.translate);
+                  onSend({
+                    type: "recieved",
+                    text: response.message.translate,
+                  });
                 } else if (response.message.imageUrl) {
-                  onSend("AI: " + response.message.imageUrl);
+                  onSend({ type: "recieved", text: response.message.imageUrl });
                 }
               },
               onError: (error) => {
                 // onSend("ME: " + customPrompt);
                 // onSend("ME: " + message);
-                onSend("AI: " + error);
+                // onSend("AI: " + error);
+                onSend({ type: "recieved", text: error });
               },
             }
           );
@@ -159,7 +225,7 @@ const ChatInput = ({ onSend, searchParams }) => {
 
   const handleKeyPress = (event) => {
     if (event.key === "Enter") {
-      handleSend();
+      handleSend(false);
     }
   };
 
@@ -168,7 +234,6 @@ const ChatInput = ({ onSend, searchParams }) => {
   };
 
   const handleFileChange = (event) => {
-    console.log("event.target", event.target);
     const file = event.target.files[0];
     if (file) {
       setFile(file);
@@ -193,7 +258,6 @@ const ChatInput = ({ onSend, searchParams }) => {
     document.getElementById("file-input").value = ""; // Reset file input
   };
 
-  // !!!Voice to text-------
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [error, setError] = useState("");
@@ -201,12 +265,6 @@ const ChatInput = ({ onSend, searchParams }) => {
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = SpeechRecognition ? new SpeechRecognition() : null;
-
-  //   useEffect(() => {
-  //     if (!recognition) {
-  //       setError("Speech Recognition API is not supported in this browser.");
-  //       return;
-  //     }
 
   // Configure recognition settings
   // recognition.continuous = true; // Keep listening even with pauses
@@ -219,10 +277,6 @@ const ChatInput = ({ onSend, searchParams }) => {
     const currentTranscript = Array.from(event.results)
       .map((result) => result[0].transcript)
       .join("");
-    //   setTranscript(
-    //     (prevTranscript) => prevTranscript + " " + currentTranscript
-    //   );
-    // setTranscript(currentTranscript);
     setMessage(currentTranscript);
   };
 
@@ -236,47 +290,19 @@ const ChatInput = ({ onSend, searchParams }) => {
 
   recognition.onerror = (event) => {
     setIsListening(false);
-    console.error("Speech recognition error:", event.error);
-    // setError("Speech recognition error: " + event.error);
   };
-
-  // recognition.addEventListener("end", recognition.start);
-
-  // recognition.onend = () => {
-  //   setIsListening(false); // Confirm stopped state here
-  //   console.log("Recognition has stopped.");
-  // };
-
-  //   return () => {
-  //     recognition.stop();
-  //   };
-  //   }, [isListening, recognition]);
 
   const startListening = () => {
     if (recognition) {
-      console.log("Starting recognition");
       setIsListening(true);
       recognition.start();
     }
   };
 
   const stopListening = () => {
-    console.log("Stopping recognition");
     setIsListening(false);
     recognition.stop();
   };
-
-  // return (
-  //   <div className=" bg-gray-300">
-  //     <h1>Voice to Text Converter</h1>
-  //     {error && <p style={{ color: "red" }}>{error}</p>}
-  //     <button onClick={isListening ? stopListening : startListening}>
-  //       {isListening ? "Stop" : "Start"} Listening
-  //     </button>
-  //     <p>{transcript}</p>
-  //   </div>
-  // );
-  // !!!Voice to text-------
 
   return (
     <Box className={"message-input relative"}>
@@ -345,7 +371,8 @@ const ChatInput = ({ onSend, searchParams }) => {
             <InputAdornment position="start">
               {(aiType === AiType.IMAGETOTEXT ||
                 aiType === AiType.FILES ||
-                aiType === AiType.TRANSLATION) && (
+                aiType === AiType.TRANSLATION ||
+                aiType == AiType.SUMMARIZATION) && (
                 <IconButton
                   edge="start"
                   color="primary"
@@ -388,7 +415,11 @@ const ChatInput = ({ onSend, searchParams }) => {
                   <IoMdMicOff />
                 </IconButton>
               )}
-              <IconButton edge="end" color="primary" onClick={handleSend}>
+              <IconButton
+                edge="end"
+                color="primary"
+                onClick={() => handleSend(false)}
+              >
                 <SendIcon />
               </IconButton>
             </InputAdornment>

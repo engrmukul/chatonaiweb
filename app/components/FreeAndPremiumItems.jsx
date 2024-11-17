@@ -172,8 +172,6 @@ export default function FreeAndPremiumItems() {
     setSelectedTag(promptData.id);
   };
 
-  console.log("packages paid", packages?.paid);
-
   return (
     <>
       <Box className={"component-item"}>
