@@ -25,8 +25,6 @@ export default function TaskForAiItems({ selectedTag }) {
     }
   );
 
-  console.log("data", data);
-
   const { data: favoriteData, isLoading: isFavoriteLoading } = useFetchData(
     endpoints.getAllFavoritePrompt,
     {
@@ -72,8 +70,8 @@ export default function TaskForAiItems({ selectedTag }) {
   const basePath = pathname.startsWith("/app/chats")
     ? "/app/chats"
     : pathname.startsWith("/app/task-for-ai")
-    ? "/app/task-for-ai"
-    : "/app/history";
+      ? "/app/task-for-ai"
+      : "/app/history";
 
   //   const handleNavigate = (id) => {
   //     router.push(`${basePath}/${id}`);

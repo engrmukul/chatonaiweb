@@ -156,8 +156,8 @@ export default function FreeAndPremiumItems() {
   const basePath = pathname.startsWith("/app/chats")
     ? "/app/chats"
     : pathname.startsWith("/app/task-for-ai")
-    ? "/app/task-for-ai"
-    : "/app/history";
+      ? "/app/task-for-ai"
+      : "/app/history";
 
   //   const handleNavigate = (id) => {
   //     router.push(`${basePath}/${id}`);
@@ -167,9 +167,10 @@ export default function FreeAndPremiumItems() {
     const query = new URLSearchParams({
       id: id,
       prompt: promptData.prompt,
+      type: promptData.aiType,
     }).toString();
     router.push(`${basePath}/${id}?${query}`);
-    setSelectedTag(promptData.id);
+    setSelectedTag(id);
   };
 
   return (
@@ -190,10 +191,11 @@ export default function FreeAndPremiumItems() {
               onClick={() =>
                 handleNavigate(pack?._id, {
                   prompt: pack?.prompt,
+                  aiType: pack?.aiType
                 })
               }
               className={"card-item min-h-72 bg-black text-white rounded "}
-              key={pack?.id}
+              key={pack?._id}
             >
               <CardActionArea>
                 <CardMedia
@@ -224,10 +226,11 @@ export default function FreeAndPremiumItems() {
           {packages?.free?.map((pack) => (
             <Card
               className={"card-item bg-black text-white rounded"}
-              key={pack?.id}
+              key={pack?._id}
               onClick={() =>
-                handleNavigate(pack?.id, {
+                handleNavigate(pack?._id, {
                   prompt: pack?.prompt,
+                  aiType: pack?.aiType
                 })
               }
             >

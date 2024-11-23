@@ -22,7 +22,6 @@ const VoiceToText = () => {
 
   // Handle results
   recognition.onresult = (event) => {
-    console.log("Recognition result event:", event);
     const currentTranscript = Array.from(event.results)
       .map((result) => result[0].transcript)
       .join("");
@@ -53,14 +52,12 @@ const VoiceToText = () => {
 
   const startListening = () => {
     if (recognition) {
-      console.log("Starting recognition");
       setIsListening(true);
       recognition.start();
     }
   };
 
   const stopListening = () => {
-    console.log("Stopping recognition");
     setIsListening(false);
     recognition.stop();
   };

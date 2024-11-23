@@ -1,12 +1,12 @@
 // src/Home.js
-import React, {useState} from 'react';
-import {chatItem} from "../AppStyle";
-import {Box, IconButton, List, ListItem, ListItemText, Menu, MenuItem} from "@mui/material";
+import React, { useState } from 'react';
+import { chatItem } from "../AppStyle";
+import { Box, IconButton, List, ListItem, ListItemText, Menu, MenuItem } from "@mui/material";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import {useRouter} from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 
 const options = [
@@ -53,7 +53,6 @@ const HistoryListItem = () => {
     };
 
     const handleMenuItemClick = (option) => {
-        console.log('Selected option:', option);
         handleClose();
     };
 
@@ -61,7 +60,6 @@ const HistoryListItem = () => {
 
 
     const handleNavigate = () => {
-        console.log('clicked')
         router.push('messenger');
     }
 
@@ -75,15 +73,15 @@ const HistoryListItem = () => {
                     {
                         data?.map((item, index) => <ListItem key={index}>
                             <Box className={'info'}>
-                                <ListItemText className={'title'} primary={item.title}/>
-                                <ListItemText className={'date-time'} primary={item.date}/>
+                                <ListItemText className={'title'} primary={item.title} />
+                                <ListItemText className={'date-time'} primary={item.date} />
                             </Box>
                             <IconButton
                                 edge="end"
                                 aria-label="options"
                                 onClick={(event) => handleClick(event, index)}
                             >
-                                <MoreVertIcon/>
+                                <MoreVertIcon />
                             </IconButton>
                             <Menu
                                 anchorEl={anchorEl}
@@ -91,10 +89,10 @@ const HistoryListItem = () => {
                                 onClose={handleClose}
                             >
                                 <MenuItem>
-                                    Rename <EditIcon/>
+                                    Rename <EditIcon />
                                 </MenuItem>
                                 <MenuItem>
-                                    Delete <Box><DeleteIcon/></Box>
+                                    Delete <Box><DeleteIcon /></Box>
                                 </MenuItem>
                             </Menu>
                         </ListItem>)

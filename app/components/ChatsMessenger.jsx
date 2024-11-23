@@ -16,8 +16,6 @@ const Messenger = () => {
   const id = searchParams.get("id");
   const prompt = searchParams.get("prompt");
 
-  // console.log("id", id, prompt);
-
   const router = useRouter();
   const [messages, setMessages] = useState([]);
 
@@ -47,7 +45,6 @@ const Messenger = () => {
   };
 
   const handleNavigate = () => {
-    console.log("clicked");
     router.push("/messenger");
   };
 
@@ -96,14 +93,12 @@ const Messenger = () => {
               {/* {messages.slice(0, -1).map((msg, index) => (
                 <div key={index}>{msg.text}</div>
               ))} */}
-              {console.log("messages.slice(0, -1)", messages.slice(0, -1))}
               {messages.slice(0, -1).map((msg, index) => {
                 const url = msg.text.match(/https:\/\/[^"]+/);
                 return (
                   <div
-                    className={`flex ${
-                      msg.type == "sent" ? "justify-end" : "justify-start"
-                    }`}
+                    className={`flex  ${msg.type == "sent" ? "justify-end" : "justify-start"
+                      }`}
                     key={index}
                   >
                     {url ? (
@@ -127,6 +122,7 @@ const Messenger = () => {
                           bgcolor: "#505050",
                           borderRadius: "12px",
                         }}
+                        className=" max-w-fit w-1/2"
                       >
                         {TextWithLineBreaks(msg.text)}
                       </Typography>
@@ -147,6 +143,7 @@ const Messenger = () => {
                         bgcolor: "#505050",
                         borderRadius: "12px",
                       }}
+                      className=" max-w-fit w-1/2"
                     >
                       {TextWithLineBreaks(messages[messages.length - 1].text)}
                       {/* <TypingEffect
@@ -173,6 +170,7 @@ const Messenger = () => {
                       bgcolor: "#505050",
                       borderRadius: "12px",
                     }}
+                    className=" max-w-fit w-1/2"
                   >
                     {/* {TextWithLineBreaks(msg.text)} */}
                     <TypingEffect

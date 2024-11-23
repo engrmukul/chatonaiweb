@@ -66,15 +66,12 @@ const ChatInput = ({ onSend, searchParams }) => {
     (item) => item.aiType == AiType.IMAGETOTEXT
   );
 
-  console.log("ImageToTextPromt", packages);
-  //!--------------------------
 
   const handleChange = (event) => {
     setMessage(event.target.value);
   };
 
   const handleSend = async (isSecondCall, processedMessage = "") => {
-    console.log("isSecondCall.....", isSecondCall);
     if (
       aiType == AiType.IMAGETOTEXT ||
       aiType == AiType.FILES ||
@@ -103,12 +100,12 @@ const ChatInput = ({ onSend, searchParams }) => {
                   data: {
                     customPrompt:
                       aiType == AiType.TRANSLATION ||
-                      aiType == AiType.SUMMARIZATION
+                        aiType == AiType.SUMMARIZATION
                         ? ImageToTextPromt.prompt
                         : message,
                     promptId:
                       aiType == AiType.TRANSLATION ||
-                      aiType == AiType.SUMMARIZATION
+                        aiType == AiType.SUMMARIZATION
                         ? ImageToTextPromt._id
                         : promptId,
                     stream: false,
@@ -273,7 +270,6 @@ const ChatInput = ({ onSend, searchParams }) => {
 
   // Handle results
   recognition.onresult = (event) => {
-    console.log("Recognition result event:", event);
     const currentTranscript = Array.from(event.results)
       .map((result) => result[0].transcript)
       .join("");
@@ -373,14 +369,14 @@ const ChatInput = ({ onSend, searchParams }) => {
                 aiType === AiType.FILES ||
                 aiType === AiType.TRANSLATION ||
                 aiType == AiType.SUMMARIZATION) && (
-                <IconButton
-                  edge="start"
-                  color="primary"
-                  onClick={handleAttachFileClick}
-                >
-                  <AttachFileIcon />
-                </IconButton>
-              )}
+                  <IconButton
+                    edge="start"
+                    color="primary"
+                    onClick={handleAttachFileClick}
+                  >
+                    <AttachFileIcon />
+                  </IconButton>
+                )}
             </InputAdornment>
           ),
 

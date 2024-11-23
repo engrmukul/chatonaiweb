@@ -16,15 +16,13 @@ export default function ReceiveQuickAns({ parentKey }) {
   const basePath = pathname.startsWith("/app/chats")
     ? "/app/chats"
     : pathname.startsWith("/app/task-for-ai")
-    ? "/app/task-for-ai"
-    : "/app/history";
+      ? "/app/task-for-ai"
+      : "/app/history";
 
   //   const handleNavigate = (id) => {
   //     router.push(`${basePath}/${id}`);
   //   };
   const handleNavigate = (id, promptData) => {
-    console.log("id, promptData", id, promptData);
-
     // Passing the ID and any prompt data as a query string
     const query = new URLSearchParams({
       id: id,
