@@ -1,6 +1,6 @@
 // src/Home.js
 import ReceiveQuickAns from "@/app/components/ReceiveQuickAns";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { mainContent, messenger } from "../AppStyle";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -64,6 +64,32 @@ const Messenger = () => {
 
     return <div>{textWithBreaks}</div>;
   }
+  const bottomRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    // Function to scroll to the bottom
+    const scrollToBottom = () => {
+      if (bottomRef.current) {
+        bottomRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+
+    // Observe changes in the container
+    const observer = new MutationObserver(() => {
+      // Scroll after DOM updates are complete
+      requestAnimationFrame(scrollToBottom);
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current, {
+        childList: true, // Detect additions/removals of child elements
+        subtree: true,  // Observe changes within nested nodes
+      });
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <>
@@ -89,21 +115,18 @@ const Messenger = () => {
               </Tabs>
             </Box>
 
-            <Box className={"message-reply-history"}>
-              {/* {messages.slice(0, -1).map((msg, index) => (
-                <div key={index}>{msg.text}</div>
-              ))} */}
+            <Box ref={containerRef} className={"message-reply-history"}>
               {messages.slice(0, -1).map((msg, index) => {
-                const url = msg.text.match(/https:\/\/[^"]+/);
+                const url = msg.text.match(/https?:\/\/[^"]+/);
                 return (
                   <div
                     className={`flex  ${msg.type == "sent" ? "justify-end" : "justify-start"
-                      }`}
+                      } mb-2`}
                     key={index}
                   >
                     {url ? (
-                      <div>
-                        <a href={`${url ? url[0] : ""}`} target="_blank">
+                      <div className=" h-fit w-fit">
+                        <a href={`${url ? url[0] : ""}`} target="_blank" className=" h-fit w-fit">
                           <img
                             src={url ? `${url[0]}` : ""}
                             alt=""
@@ -132,7 +155,7 @@ const Messenger = () => {
               })}
               {messages.length > 0 &&
                 messages[messages.length - 1].type == "sent" && (
-                  <div className={`flex justify-end`}>
+                  <div className={`flex justify-end  mb-2`}>
                     <Typography
                       // key={index}
                       // variant="body1"
@@ -158,7 +181,7 @@ const Messenger = () => {
                 messages[messages.length - 1].type == "recieved" &&
                 typeof messages[messages.length - 1].text == "string" &&
                 !messages[messages.length - 1].text?.match(
-                  /https:\/\/[^"]+/
+                  /https?:\/\/[^"]+/
                 ) && (
                   <Typography
                     // key={index}
@@ -170,12 +193,12 @@ const Messenger = () => {
                       bgcolor: "#505050",
                       borderRadius: "12px",
                     }}
-                    className=" max-w-fit w-1/2"
+                    className=" max-w-fit w-1/2 mb-2"
                   >
                     {/* {TextWithLineBreaks(msg.text)} */}
                     <TypingEffect
                       text={messages[messages.length - 1].text}
-                      speed={30}
+                      speed={8}
                     />
                   </Typography>
                 )}
@@ -183,8 +206,8 @@ const Messenger = () => {
               {messages.length > 0 &&
                 messages[messages.length - 1].type == "recieved" &&
                 typeof messages[messages.length - 1].text == "string" &&
-                messages[messages.length - 1].text.match(/https:\/\/[^"]+/) && (
-                  <div>
+                messages[messages.length - 1].text.match(/https?:\/\/[^"]+/) && (
+                  <div className=" mb-2">
                     <a
                       href={messages[messages.length - 1].text}
                       target="_blank"
@@ -197,6 +220,7 @@ const Messenger = () => {
                     </a>
                   </div>
                 )}
+              <div ref={bottomRef} />
             </Box>
             <ChatInput onSend={handleSend} searchParams={searchParams} />
           </Box>

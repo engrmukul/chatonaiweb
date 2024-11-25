@@ -81,7 +81,7 @@ const ChatInput = ({ onSend, searchParams }) => {
       const formData = new FormData();
       formData.append("file", file);
       try {
-        onSend({ type: "sent", text: message });
+        // onSend({ type: "sent", text: message });
         fileupload(
           {
             data: formData,
@@ -92,6 +92,10 @@ const ChatInput = ({ onSend, searchParams }) => {
           },
           {
             onSuccess: (response) => {
+              onSend({
+                type: "sent", text: (AiType.FILES || aiType == AiType.IMAGETOTEXT) ? response.data.url : ""
+              });
+              onSend({ type: "sent", text: message });
               setImagePreview(null); //Removing file after upload
               setFileIcon(false);
               setFile(null); //Removing file after upload
