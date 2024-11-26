@@ -103,7 +103,7 @@ const Messenger = () => {
             <Box className={"turbo-gpt-tab"}>
               <Tabs
                 value={value}
-                onChange={handleChange}
+                // onChange={handleChange}
                 aria-label="icon position tabs example"
               >
                 <Tab
@@ -117,7 +117,7 @@ const Messenger = () => {
 
             <Box ref={containerRef} className={"message-reply-history"}>
               {messages.slice(0, -1).map((msg, index) => {
-                const url = msg.text.match(/https?:\/\/[^"]+/);
+                const url = msg.text && msg.text.match(/https?:\/\/[^"]+/);
                 return (
                   <div
                     className={`flex  ${msg.type == "sent" ? "justify-end" : "justify-start"

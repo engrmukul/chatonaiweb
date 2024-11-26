@@ -38,7 +38,6 @@ const ChatInput = ({ onSend, searchParams }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [fileIcon, setFileIcon] = useState(false);
 
-  //!--------------------------
   const [packages, setPackages] = useState({
     free: [],
     paid: [],
@@ -92,9 +91,14 @@ const ChatInput = ({ onSend, searchParams }) => {
           },
           {
             onSuccess: (response) => {
-              onSend({
-                type: "sent", text: (AiType.FILES || aiType == AiType.IMAGETOTEXT) ? response.data.url : ""
-              });
+              // onSend({
+              //   type: "sent", text: (AiType.FILES || aiType == AiType.IMAGETOTEXT) ? response.data.url : ""
+              // });
+              if (aiType == AiType.IMAGETOTEXT) {
+                onSend({
+                  type: "sent", text: response.data.url
+                });
+              }
               onSend({ type: "sent", text: message });
               setImagePreview(null); //Removing file after upload
               setFileIcon(false);
