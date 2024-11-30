@@ -10,14 +10,19 @@ import Tab from "@mui/material/Tab";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import BoltIcon from "@mui/icons-material/Bolt";
 import { strict } from "assert";
+import AIType from "./enums/AiTypeEnum";
+import AnimatedLoader from "./Loader/Loader"
+import ImageDownload from "./downloadImage/Download"
 
 const Messenger = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const prompt = searchParams.get("prompt");
+  const aiType = searchParams.get("type");
 
   const router = useRouter();
   const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSend = (message) => {
     setMessages((prevMessages) => [...prevMessages, message]);
@@ -41,7 +46,7 @@ const Messenger = () => {
       return () => clearInterval(timer); // Cleanup on unmount
     }, [text, speed]);
 
-    return <span>{displayedText}</span>;
+    return <span style={{ whiteSpace: "pre-wrap" }}>{displayedText}</span>;
   };
 
   const handleNavigate = () => {
@@ -124,8 +129,10 @@ const Messenger = () => {
                       } mb-2`}
                     key={index}
                   >
+                    {/* {aiType == AIType.IMAGES && <div className=" h-[400px] w-[500px] shadow-md animate-pulse"></div>} */}
                     {url ? (
                       <div className=" h-fit w-fit">
+
                         <a href={`${url ? url[0] : ""}`} target="_blank" className=" h-fit w-fit">
                           <img
                             src={url ? `${url[0]}` : ""}
@@ -169,10 +176,6 @@ const Messenger = () => {
                       className=" max-w-fit w-1/2"
                     >
                       {TextWithLineBreaks(messages[messages.length - 1].text)}
-                      {/* <TypingEffect
-                        text={messages[messages.length - 1].text}
-                        speed={30}
-                      /> */}
                     </Typography>
                   </div>
                 )}
@@ -207,22 +210,30 @@ const Messenger = () => {
                 messages[messages.length - 1].type == "recieved" &&
                 typeof messages[messages.length - 1].text == "string" &&
                 messages[messages.length - 1].text.match(/https?:\/\/[^"]+/) && (
-                  <div className=" mb-2">
-                    <a
+                  <div className=" relative mb-2 w-fit max-w-fit">
+                    {/* <a
                       href={messages[messages.length - 1].text}
                       target="_blank"
-                    >
-                      <img
-                        src={messages[messages.length - 1].text}
-                        alt=""
-                        className="h-[400px] w-[500px]"
-                      />
-                    </a>
+                    > */}
+                    <img
+                      src={messages[messages.length - 1].text}
+                      alt=""
+                      className="h-[400px] w-[500px]"
+                    />
+                    {/* </a> */}
+                    {/* <a className=" absolute bottom-0 right-0" href={messages[messages.length - 1].text} download={"image"} style={{ marginTop: "20px", display: "inline-block", textDecoration: "none", backgroundColor: "#4CAF50", color: "white", padding: "10px 20px", borderRadius: "5px" }}>
+                      Download Image
+                    </a> */}
+                    <ImageDownload ImageUrl={messages[messages.length - 1].text} fileName="image.jpg" />
                   </div>
                 )}
               <div ref={bottomRef} />
+              {console.log(" isLoading", isLoading)}
+              {isLoading && <div className=" flex justify-start ">
+                <AnimatedLoader size={8} color="white" />
+              </div>}
             </Box>
-            <ChatInput onSend={handleSend} searchParams={searchParams} />
+            <ChatInput onSend={handleSend} searchParams={searchParams} setIsLoading={setIsLoading} />
           </Box>
         </Box>
       </Box>
@@ -231,3 +242,6 @@ const Messenger = () => {
 };
 
 export default Messenger;
+
+
+

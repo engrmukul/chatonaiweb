@@ -24,7 +24,7 @@ import useFetchData from "../library/hooks/useFetchData";
 // import MicIcon from "@material-ui/icons/Mic";
 // import MicOffIcon from "@material-ui/icons/MicOff";
 
-const ChatInput = ({ onSend, searchParams }) => {
+const ChatInput = ({ onSend, searchParams, setIsLoading }) => {
   const customPrompt = searchParams.get("prompt");
   const promptId = searchParams.get("id");
   const aiType = searchParams.get("type");
@@ -100,6 +100,7 @@ const ChatInput = ({ onSend, searchParams }) => {
                 });
               }
               onSend({ type: "sent", text: message });
+              setIsLoading(true)
               setImagePreview(null); //Removing file after upload
               setFileIcon(false);
               setFile(null); //Removing file after upload
@@ -129,6 +130,7 @@ const ChatInput = ({ onSend, searchParams }) => {
                 },
                 {
                   onSuccess: (response) => {
+                    setIsLoading(false)
                     if (
                       (aiType == AiType.TRANSLATION ||
                         aiType == AiType.SUMMARIZATION) &&
@@ -159,6 +161,7 @@ const ChatInput = ({ onSend, searchParams }) => {
                     }
                   },
                   onError: (error) => {
+                    setIsLoading(false)
                     // onSend("ME: " + customPrompt);
                     // onSend("ME: " + message);
                     // onSend("AI: " + error);
@@ -170,17 +173,21 @@ const ChatInput = ({ onSend, searchParams }) => {
               // }
             },
             onError: (error) => {
+              setIsLoading(false)
               console.log("file___ERROR", error);
             },
           }
         );
       } catch (error) {
+        setIsLoading(false)
         console.error("Error uploading file", error);
       }
     } else {
       try {
         if (message.trim()) {
           !isSecondCall && onSend({ type: "sent", text: message });
+          console.log("calling.....")
+          setIsLoading(true)
           mutate(
             {
               data: {
@@ -199,6 +206,7 @@ const ChatInput = ({ onSend, searchParams }) => {
             },
             {
               onSuccess: (response) => {
+                setIsLoading(false)
                 if (response.message.text) {
                   onSend({ type: "recieved", text: response.message.text });
                 } else if (response.message.summeriz) {
@@ -213,6 +221,7 @@ const ChatInput = ({ onSend, searchParams }) => {
                 }
               },
               onError: (error) => {
+                setIsLoading(false)
                 // onSend("ME: " + customPrompt);
                 // onSend("ME: " + message);
                 // onSend("AI: " + error);
@@ -223,6 +232,7 @@ const ChatInput = ({ onSend, searchParams }) => {
           setMessage("");
         }
       } catch (error) {
+        setIsLoading(false)
         console.error(error);
       }
     }
