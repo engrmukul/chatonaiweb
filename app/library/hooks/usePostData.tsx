@@ -16,13 +16,40 @@ interface PostConfig {
   headers?: Record<string, string>;
 }
 
+// const postData = async (
+//   url: string,
+//   { data, headers }: PostConfig
+// ): Promise<Data> => {
+//   const response = await axios.post<Data>(url, data, { headers });
+//   return response.data;
+// };
+
+// const usePostData = (
+//   url: string
+// ): UseMutationResult<Data, Error, PostConfig> => {
+//   const user = getJwtUserInfo();
+//   const router = useRouter();
+
+//   const currentTime = Date.now();
+//   if (currentTime > user?.exp * 1000) {
+//     localStorage.removeItem("authToken");
+//     router.push("/");
+//   }
+
+//   return useMutation<Data, Error, PostConfig>({
+//     mutationFn: (config: PostConfig) => postData(url, config),
+//   });
+// };
+
 const postData = async (
   url: string,
-  { data, headers }: PostConfig
-): Promise<Data> => {
-  const response = await axios.post<Data>(url, data, { headers });
+  { data, headers, signal }: PostConfig & { signal?: AbortSignal }
+): Promise<any> => {
+  const response = await axios.post(url, data, { headers, signal });
   return response.data;
 };
+
+let controller: AbortController | null;
 
 const usePostData = (
   url: string
@@ -30,6 +57,7 @@ const usePostData = (
   const user = getJwtUserInfo();
   const router = useRouter();
 
+  // Check for token expiration and redirect if necessary
   const currentTime = Date.now();
   if (currentTime > user?.exp * 1000) {
     localStorage.removeItem("authToken");
@@ -37,8 +65,26 @@ const usePostData = (
   }
 
   return useMutation<Data, Error, PostConfig>({
-    mutationFn: (config: PostConfig) => postData(url, config),
+    mutationFn: (config: PostConfig) => {
+      // Create a new AbortController for each mutation
+      controller = new AbortController();
+      return postData(url, { ...config, signal: controller.signal });
+    },
+    onSettled: () => {
+      // Cleanup: reset the controller after the mutation finishes
+      controller = null;
+    },
   });
+};
+
+// Optional: Provide a way to cancel the ongoing request
+export const cancelPostDataRequest = () => {
+  if (controller) {
+    controller.abort(); // Abort the current request
+    controller = null; // Reset the controller
+  } else {
+    console.log("No active request to cancel.");
+  }
 };
 
 export default usePostData;

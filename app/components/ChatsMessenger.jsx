@@ -14,6 +14,8 @@ import AIType from "./enums/AiTypeEnum";
 import AnimatedLoader from "./Loader/Loader"
 import ImageDownload from "./downloadImage/Download"
 
+import TypingEffect from "./TypingEffect"
+
 const Messenger = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -23,34 +25,16 @@ const Messenger = () => {
   const router = useRouter();
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [stopTyping, setStopTyping] = useState(false); // State to control stopping
 
   const handleSend = (message) => {
     setMessages((prevMessages) => [...prevMessages, message]);
   };
 
-  const TypingEffect = ({ text, speed = 100 }) => {
-    const [displayedText, setDisplayedText] = useState("");
-    useEffect(() => {
-      let index = 0;
-      let currentText = ""; // Local variable to avoid skipping characters
-      const timer = setInterval(() => {
-        if (index < text.length) {
-          currentText += text[index]; // Append next character to the local variable
-          setDisplayedText(currentText); // Update state with the local variable
-          index++;
-        } else {
-          clearInterval(timer); // Stop the interval when done
-        }
-      }, speed);
-
-      return () => clearInterval(timer); // Cleanup on unmount
-    }, [text, speed]);
-
-    return <span style={{ whiteSpace: "pre-wrap" }}>{displayedText}</span>;
-  };
-
-  const handleNavigate = () => {
-    router.push("/messenger");
+  const handleStopTyping = () => {
+    setStopTyping(true); // Trigger to stop typing
+    setIsTyping(false)
   };
 
   const [value, setValue] = React.useState(0);
@@ -131,7 +115,7 @@ const Messenger = () => {
                   >
                     {/* {aiType == AIType.IMAGES && <div className=" h-[400px] w-[500px] shadow-md animate-pulse"></div>} */}
                     {url ? (
-                      <div className=" h-fit w-fit">
+                      <div className=" relative h-fit w-fit">
 
                         <a href={`${url ? url[0] : ""}`} target="_blank" className=" h-fit w-fit">
                           <img
@@ -140,6 +124,7 @@ const Messenger = () => {
                             className="h-[400px] w-[500px]"
                           />
                         </a>
+                        <ImageDownload imageUrl={url[0]} />
                       </div>
                     ) : (
                       <Typography
@@ -202,6 +187,8 @@ const Messenger = () => {
                     <TypingEffect
                       text={messages[messages.length - 1].text}
                       speed={8}
+                      setIsTyping={setIsTyping}
+                      stopTyping={stopTyping}
                     />
                   </Typography>
                 )}
@@ -211,29 +198,20 @@ const Messenger = () => {
                 typeof messages[messages.length - 1].text == "string" &&
                 messages[messages.length - 1].text.match(/https?:\/\/[^"]+/) && (
                   <div className=" relative mb-2 w-fit max-w-fit">
-                    {/* <a
-                      href={messages[messages.length - 1].text}
-                      target="_blank"
-                    > */}
                     <img
                       src={messages[messages.length - 1].text}
                       alt=""
                       className="h-[400px] w-[500px]"
                     />
-                    {/* </a> */}
-                    {/* <a className=" absolute bottom-0 right-0" href={messages[messages.length - 1].text} download={"image"} style={{ marginTop: "20px", display: "inline-block", textDecoration: "none", backgroundColor: "#4CAF50", color: "white", padding: "10px 20px", borderRadius: "5px" }}>
-                      Download Image
-                    </a> */}
-                    <ImageDownload ImageUrl={messages[messages.length - 1].text} fileName="image.jpg" />
+                    <ImageDownload imageUrl={messages[messages.length - 1].text} />
                   </div>
                 )}
               <div ref={bottomRef} />
-              {console.log(" isLoading", isLoading)}
               {isLoading && <div className=" flex justify-start ">
                 <AnimatedLoader size={8} color="white" />
               </div>}
             </Box>
-            <ChatInput onSend={handleSend} searchParams={searchParams} setIsLoading={setIsLoading} />
+            <ChatInput onSend={handleSend} searchParams={searchParams} setIsLoading={setIsLoading} isTyping={isTyping} setIsTyping={setIsTyping} handleStopTyping={handleStopTyping} />
           </Box>
         </Box>
       </Box>

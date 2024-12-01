@@ -10,7 +10,8 @@ import {
   Typography,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import usePostData from "../library/hooks/usePostData";
+import StopIcon from '@mui/icons-material/Stop';
+import usePostData, { cancelPostDataRequest } from "../library/hooks/usePostData";
 import { endpoints } from "../library/share/endpoints";
 import { getJwtToken } from "../library/functions";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
@@ -21,10 +22,8 @@ import { FaRegFile } from "react-icons/fa6";
 import { IoMdMic } from "react-icons/io";
 import { IoMdMicOff } from "react-icons/io";
 import useFetchData from "../library/hooks/useFetchData";
-// import MicIcon from "@material-ui/icons/Mic";
-// import MicOffIcon from "@material-ui/icons/MicOff";
 
-const ChatInput = ({ onSend, searchParams, setIsLoading }) => {
+const ChatInput = ({ onSend, searchParams, setIsLoading, isTyping, setIsTyping, handleStopTyping }) => {
   const customPrompt = searchParams.get("prompt");
   const promptId = searchParams.get("id");
   const aiType = searchParams.get("type");
@@ -37,6 +36,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading }) => {
   const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [fileIcon, setFileIcon] = useState(false);
+  const [error, setError] = useState(false);
 
   const [packages, setPackages] = useState({
     free: [],
@@ -67,10 +67,27 @@ const ChatInput = ({ onSend, searchParams, setIsLoading }) => {
 
 
   const handleChange = (event) => {
+    setError(false)
     setMessage(event.target.value);
   };
 
+  const validateYouTubeLink = (message) => {
+    const youtubeRegex = /^(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S+?[?&]v=|.*[?&]v=)([A-Za-z0-9_-]+)|youtu\.be\/([A-Za-z0-9_-]+)))/;
+    return youtubeRegex.test(message);
+  };
+
   const handleSend = async (isSecondCall, processedMessage = "") => {
+    // Example usage:
+    if (aiType === AiType.YOUTUBE_LINK) {
+      if (validateYouTubeLink(message)) {
+      } else {
+        setError(true)
+        return;
+      }
+    }
+
+    setIsTyping(true)
+
     if (
       aiType == AiType.IMAGETOTEXT ||
       aiType == AiType.FILES ||
@@ -186,7 +203,6 @@ const ChatInput = ({ onSend, searchParams, setIsLoading }) => {
       try {
         if (message.trim()) {
           !isSecondCall && onSend({ type: "sent", text: message });
-          console.log("calling.....")
           setIsLoading(true)
           mutate(
             {
@@ -239,7 +255,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading }) => {
   };
 
   const handleKeyPress = (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && message != "") {
       handleSend(false);
     }
   };
@@ -275,7 +291,6 @@ const ChatInput = ({ onSend, searchParams, setIsLoading }) => {
 
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
-  const [error, setError] = useState("");
 
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -317,6 +332,11 @@ const ChatInput = ({ onSend, searchParams, setIsLoading }) => {
     setIsListening(false);
     recognition.stop();
   };
+
+  const cancelRequest = () => {
+    cancelPostDataRequest()
+  }
+
 
   return (
     <Box className={"message-input relative"}>
@@ -363,6 +383,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading }) => {
       <TextField
         // multiline
         // rows={1}
+        error={error}
         autoComplete="off"
         variant="outlined"
         fullWidth
@@ -429,13 +450,22 @@ const ChatInput = ({ onSend, searchParams, setIsLoading }) => {
                   <IoMdMicOff />
                 </IconButton>
               )}
-              <IconButton
+              {!isTyping ? (<IconButton
                 edge="end"
                 color="primary"
-                onClick={() => handleSend(false)}
+                onClick={() => { message != "" && handleSend(false) }}
               >
                 <SendIcon />
-              </IconButton>
+              </IconButton>)
+                :
+                (<IconButton
+                  edge="end"
+                  color="primary"
+                  onClick={() => { cancelRequest(); handleStopTyping() }}
+                >
+                  <StopIcon />
+                </IconButton>)
+              }
             </InputAdornment>
           ),
         }}
@@ -450,7 +480,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading }) => {
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
-    </Box>
+    </Box >
     // <VoiceToText />
   );
 };
