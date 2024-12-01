@@ -12,6 +12,7 @@ interface PostData {
 }
 
 interface PostConfig {
+  id?: string;
   data: PostData;
   headers?: Record<string, string>;
 }
@@ -64,11 +65,12 @@ const usePostData = (
     router.push("/");
   }
 
-  return useMutation<Data, Error, PostConfig>({
+  return useMutation<Data, Error, PostConfig, { id?: string }>({
     mutationFn: (config: PostConfig) => {
-      // Create a new AbortController for each mutation
+      const { id, ...rest } = config;
       controller = new AbortController();
-      return postData(url, { ...config, signal: controller.signal });
+      const customUrl = id ? `${url}/${id}` : url;
+      return postData(customUrl, { ...rest, signal: controller.signal });
     },
     onSettled: () => {
       // Cleanup: reset the controller after the mutation finishes

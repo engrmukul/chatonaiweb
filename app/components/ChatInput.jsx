@@ -23,7 +23,8 @@ import { IoMdMic } from "react-icons/io";
 import { IoMdMicOff } from "react-icons/io";
 import useFetchData from "../library/hooks/useFetchData";
 
-const ChatInput = ({ onSend, searchParams, setIsLoading, isTyping, setIsTyping, handleStopTyping }) => {
+const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTyping, setIsTyping, handleStopTyping }) => {
+
   const customPrompt = searchParams.get("prompt");
   const promptId = searchParams.get("id");
   const aiType = searchParams.get("type");
@@ -450,7 +451,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isTyping, setIsTyping, 
                   <IoMdMicOff />
                 </IconButton>
               )}
-              {!isTyping ? (<IconButton
+              {!isTyping || (aiType == AiType.IMAGES && !isResponseLoading) ? (<IconButton
                 edge="end"
                 color="primary"
                 onClick={() => { message != "" && handleSend(false) }}

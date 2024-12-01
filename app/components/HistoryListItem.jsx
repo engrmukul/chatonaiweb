@@ -1,5 +1,5 @@
 // src/Home.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { chatItem } from "../AppStyle";
 import { Box, IconButton, List, ListItem, ListItemText, Menu, MenuItem } from "@mui/material";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -7,6 +7,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import { useRouter } from 'next/navigation';
+import useFetchData from '../library/hooks/useFetchData';
+import { endpoints } from '../library/share/endpoints';
+import usePostData from '../library/hooks/usePostData';
+import { getJwtToken } from '../library/functions';
 
 
 const options = [
@@ -15,28 +19,32 @@ const options = [
     'Option 3',
 ];
 
-const data = [
-    {
-        title: 'Option 1',
-        date: '15.05.2024 00:55'
-    },
-    {
-        title: 'Option 2',
-        date: '15.05.2024 00:55'
-    },
-    {
-        title: 'Option 3',
-        date: '15.05.2024 00:55'
-    },
-    {
-        title: 'Option 4',
-        date: '15.05.2024 00:55'
-    }
-]
+// const data = [
+//     {
+//         title: 'Option 1',
+//         date: '15.05.2024 00:55'
+//     },
+//     {
+//         title: 'Option 2',
+//         date: '15.05.2024 00:55'
+//     },
+//     {
+//         title: 'Option 3',
+//         date: '15.05.2024 00:55'
+//     },
+//     {
+//         title: 'Option 4',
+//         date: '15.05.2024 00:55'
+//     }
+// ]
+
 
 
 const HistoryListItem = () => {
+    const [history, sethistory] = useState([])
 
+    const { data, isLoading, refetch } = useFetchData(endpoints.getAllHistory)
+    const { mutate, isLoading: deleteLoading } = usePostData(endpoints.deleteHistory);
     const router = useRouter();
 
     const [anchorEl, setAnchorEl] = useState(null);
@@ -55,7 +63,28 @@ const HistoryListItem = () => {
     const handleMenuItemClick = (option) => {
         handleClose();
     };
+    const userToken = getJwtToken();
 
+    const handleDelete = async (id, index) => {
+        mutate({
+            id, headers: {
+                Authorization: `Bearer ${userToken}`,
+            }
+        })
+
+        // removeItem(index);
+        refetch()
+    }
+
+    useEffect(() => {
+        sethistory(data?.data)
+    }, [data])
+
+    const removeItem = (index) => {
+        const newArray = [...history]; // Make a copy of the array
+        newArray.splice(index, 1);   // Remove the item at the specified index
+        sethistory(newArray);          // Update the state with the new array
+    };
 
 
 
@@ -71,10 +100,10 @@ const HistoryListItem = () => {
             <Box className={"list-wrap"}>
                 <List>
                     {
-                        data?.map((item, index) => <ListItem key={index}>
+                        history?.map((item, index) => <ListItem key={index}>
                             <Box className={'info'}>
-                                <ListItemText className={'title'} primary={item.title} />
-                                <ListItemText className={'date-time'} primary={item.date} />
+                                <ListItemText className={'title'} primary={item.promptId.title} />
+                                <ListItemText className={'date-time'} primary={(new Date(item.createdAt)).toDateString()} />
                             </Box>
                             <IconButton
                                 edge="end"
@@ -88,10 +117,10 @@ const HistoryListItem = () => {
                                 open={Boolean(anchorEl) && selectedIndex === index}
                                 onClose={handleClose}
                             >
-                                <MenuItem>
+                                {/* <MenuItem>
                                     Rename <EditIcon />
-                                </MenuItem>
-                                <MenuItem>
+                                </MenuItem> */}
+                                <MenuItem onClick={() => handleDelete(item._id, index)}>
                                     Delete <Box><DeleteIcon /></Box>
                                 </MenuItem>
                             </Menu>

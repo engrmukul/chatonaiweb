@@ -16,7 +16,8 @@ export const endpoints = {
   getAllFavoritePrompt: `api/favorite-prompts/`,
   removeFavoritePromptById: (promtId: string) =>
     `api/favorite-prompts/${promtId}`,
-
+  getAllHistory:`api/history`,
+  deleteHistory: `api/history`,
   // AI
   createAI: `api/ai`,
 

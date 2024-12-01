@@ -87,7 +87,7 @@ const ImageDownload = ({ imageUrl, fileName }) => {
     };
 
     return (
-        <div className=" absolute bottom-0 left-0 rounded-sm flex gap-2 justify-between p-2 bg-black/30 hover:bg-black/70">
+        <div className=" absolute bottom-0 left-0 flex gap-2 justify-between p-2 bg-black/30 hover:bg-black/70">
             <button
                 onClick={handleDownload}
             >

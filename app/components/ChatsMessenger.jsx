@@ -15,6 +15,7 @@ import AnimatedLoader from "./Loader/Loader"
 import ImageDownload from "./downloadImage/Download"
 
 import TypingEffect from "./TypingEffect"
+import Image from "next/image";
 
 const Messenger = () => {
   const searchParams = useSearchParams();
@@ -117,13 +118,13 @@ const Messenger = () => {
                     {url ? (
                       <div className=" relative h-fit w-fit">
 
-                        <a href={`${url ? url[0] : ""}`} target="_blank" className=" h-fit w-fit">
-                          <img
-                            src={url ? `${url[0]}` : ""}
-                            alt=""
-                            className="h-[400px] w-[500px]"
-                          />
-                        </a>
+                        {/* <a href={`${url ? url[0] : ""}`} target="_blank" className=" h-fit w-fit"> */}
+                        <img
+                          src={url ? `${url[0]}` : ""}
+                          alt=""
+                          className="h-[400px] w-[500px]"
+                        />
+                        {/* </a> */}
                         <ImageDownload imageUrl={url[0]} />
                       </div>
                     ) : (
@@ -197,11 +198,15 @@ const Messenger = () => {
                 messages[messages.length - 1].type == "recieved" &&
                 typeof messages[messages.length - 1].text == "string" &&
                 messages[messages.length - 1].text.match(/https?:\/\/[^"]+/) && (
-                  <div className=" relative mb-2 w-fit max-w-fit">
-                    <img
+                  <div className=" relative mb-2 h-[400px] w-[500px] bg-black/30 max-w-fit">
+                    <Image
                       src={messages[messages.length - 1].text}
                       alt=""
                       className="h-[400px] w-[500px]"
+                      height={400}
+                      width={500}
+                      unoptimized
+
                     />
                     <ImageDownload imageUrl={messages[messages.length - 1].text} />
                   </div>
@@ -211,7 +216,7 @@ const Messenger = () => {
                 <AnimatedLoader size={8} color="white" />
               </div>}
             </Box>
-            <ChatInput onSend={handleSend} searchParams={searchParams} setIsLoading={setIsLoading} isTyping={isTyping} setIsTyping={setIsTyping} handleStopTyping={handleStopTyping} />
+            <ChatInput onSend={handleSend} searchParams={searchParams} setIsLoading={setIsLoading} isResponseLoading={isLoading} isTyping={isTyping} setIsTyping={setIsTyping} handleStopTyping={handleStopTyping} />
           </Box>
         </Box>
       </Box>
