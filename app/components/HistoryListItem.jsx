@@ -41,6 +41,7 @@ const options = [
 
 
 const HistoryListItem = () => {
+    const route = useRouter()
     const [history, sethistory] = useState([])
 
     const { data, isLoading, refetch } = useFetchData(endpoints.getAllHistory)
@@ -88,8 +89,8 @@ const HistoryListItem = () => {
 
 
 
-    const handleNavigate = () => {
-        router.push('messenger');
+    const handleNavigate = ({ id, aiType }) => {
+        router.push(`/app/chats/${id}?id=${id}&type=${aiType}`);
     }
 
     return (
@@ -100,8 +101,14 @@ const HistoryListItem = () => {
             <Box className={"list-wrap"}>
                 <List>
                     {
-                        history?.map((item, index) => <ListItem key={index}>
-                            <Box className={'info'}>
+                        history?.map((item, index) =>
+                        (<ListItem
+                            key={index}
+                            className=' hover:cursor-pointer'
+                            onClick={() => handleNavigate({
+                                id: item.promptId._id, aiType: item.promptId.aiType, request: item.request, response: item.response
+                            })}>
+                            <Box className='info' >
                                 <ListItemText className={'title'} primary={item.promptId.title} />
                                 <ListItemText className={'date-time'} primary={(new Date(item.createdAt)).toDateString()} />
                             </Box>
@@ -124,7 +131,7 @@ const HistoryListItem = () => {
                                     Delete <Box><DeleteIcon /></Box>
                                 </MenuItem>
                             </Menu>
-                        </ListItem>)
+                        </ListItem>))
                     }
                 </List>
             </Box>

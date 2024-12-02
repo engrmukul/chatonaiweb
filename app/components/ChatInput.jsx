@@ -215,7 +215,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                 // stream: true,
                 stream: false,
                 voice: "alloy",
-                customFileUrl: "",
+                customFileUrl: aiType === AiType.YOUTUBE_LINK ? message : "",
               },
               headers: {
                 Authorization: `Bearer ${userToken}`,
@@ -242,7 +242,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                 // onSend("ME: " + customPrompt);
                 // onSend("ME: " + message);
                 // onSend("AI: " + error);
-                onSend({ type: "recieved", text: error });
+                onSend({ type: "recieved", text: error.response.data.message });
               },
             }
           );

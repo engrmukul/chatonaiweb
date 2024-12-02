@@ -107,7 +107,9 @@ const Messenger = () => {
 
             <Box ref={containerRef} className={"message-reply-history"}>
               {messages.slice(0, -1).map((msg, index) => {
-                const url = msg.text && msg.text.match(/https?:\/\/[^"]+/);
+                if (typeof msg.text !== "string") return
+                const url = (msg.text && typeof msg.text == "string") && msg.text.match(/https?:\/\/[^"]+/);
+                const youtubeUrl = url && url[0].includes("https://www.youtube.com")
                 return (
                   <div
                     className={`flex  ${msg.type == "sent" ? "justify-end" : "justify-start"
@@ -115,7 +117,7 @@ const Messenger = () => {
                     key={index}
                   >
                     {/* {aiType == AIType.IMAGES && <div className=" h-[400px] w-[500px] shadow-md animate-pulse"></div>} */}
-                    {url ? (
+                    {url && !youtubeUrl ? (
                       <div className=" relative h-fit w-fit">
 
                         {/* <a href={`${url ? url[0] : ""}`} target="_blank" className=" h-fit w-fit"> */}
