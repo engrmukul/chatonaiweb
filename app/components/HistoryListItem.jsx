@@ -89,8 +89,8 @@ const HistoryListItem = () => {
 
 
 
-    const handleNavigate = ({ id, aiType }) => {
-        router.push(`/app/chats/${id}?id=${id}&type=${aiType}`);
+    const handleNavigate = ({ id, aiType, request, response }) => {
+        router.push(`/app/chats/${id}?id=${id}&type=${aiType}&request=${request}&response=${response}`);
     }
 
     return (

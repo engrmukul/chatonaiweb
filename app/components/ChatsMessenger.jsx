@@ -22,9 +22,11 @@ const Messenger = () => {
   const id = searchParams.get("id");
   const prompt = searchParams.get("prompt");
   const aiType = searchParams.get("type");
+  const request = searchParams.get("request");
+  const response = searchParams.get("response");
 
   const router = useRouter();
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([{ type: "sent", text: request }, { type: "recieved", text: response }]);
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [stopTyping, setStopTyping] = useState(false); // State to control stopping
