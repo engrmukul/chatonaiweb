@@ -18,10 +18,13 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CloseIcon from "@mui/icons-material/Close";
 import AiType from "./enums/AiTypeEnum";
 import { FaFile } from "react-icons/fa";
-import { FaRegFile } from "react-icons/fa6";
 import { IoMdMic } from "react-icons/io";
 import { IoMdMicOff } from "react-icons/io";
 import useFetchData from "../library/hooks/useFetchData";
+import { BiSolidFilePdf } from "react-icons/bi";
+import { TbFileSpreadsheet } from "react-icons/tb";
+import { FaFileWord } from "react-icons/fa";
+import { IoDocumentText } from "react-icons/io5";
 
 const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTyping, setIsTyping, handleStopTyping }) => {
 
@@ -37,6 +40,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
   const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [fileIcon, setFileIcon] = useState(false);
+  const [fileDetails, setFileDetails] = useState({});
   const [error, setError] = useState(false);
 
   const [packages, setPackages] = useState({
@@ -116,6 +120,8 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                 onSend({
                   type: "sent", text: response.data.url
                 });
+              } else if (file && !file.type.startsWith("image/")) {
+                onSend({ type: "sent", text: JSON.stringify(fileDetails) })
               }
               onSend({ type: "sent", text: message });
               setIsLoading(true)
@@ -183,7 +189,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                     // onSend("ME: " + customPrompt);
                     // onSend("ME: " + message);
                     // onSend("AI: " + error);
-                    onSend({ type: "recieved", text: error });
+                    onSend({ type: "recieved", text: error.response.data.message });
                   },
                 }
               );
@@ -192,6 +198,8 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
             },
             onError: (error) => {
               setIsLoading(false)
+              onSend({ type: "recieved", text: error.response.data.message })
+              setMessage("");
               console.log("file___ERROR", error);
             },
           }
@@ -279,6 +287,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
       } else {
         setImagePreview(null); // Clear preview if not an image
         setFileIcon(true);
+        setFileDetails({ name: file.name, type: file.type })
       }
     }
   };
@@ -338,12 +347,31 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
     cancelPostDataRequest()
   }
 
+  // application/pdf
+  // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+  // application/vnd.openxmlformats-officedocument.wordprocessingml.document
+  // text/plain
+
+  // switch (fileDetails.type) {
+  //   case "application/pdf":
+  //     <FaFileAlt size={50} color="black" />
+  //     break;
+  //   case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+  //     <TbFileSpreadsheet size={50} color="black" />
+  //     break;
+  //   case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+  //     <FaFileWord size={50} color="black" />
+  //     break;
+  //   default:
+  //     <IoDocumentText size={50} color="black" />
+  // }
+
 
   return (
     <Box className={"message-input relative"}>
       {/* Image preview */}
       {(imagePreview || fileIcon) && (
-        <div className=" absolute bottom-full">
+        <div className=" absolute bottom-full ">
           <div
             // style={{ marginTop: 10, textAlign: "center", position: "relative" }}
             className=" relative"
@@ -375,9 +403,23 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                 alt="Preview"
                 style={{ maxWidth: "100%", maxHeight: 50, borderRadius: 8 }}
               />
-            ) : (
-              <FaRegFile size={50} color="green" />
-            )}
+            ) : <div className="w-fit h-fit">
+              {
+                (() => {
+                  switch (fileDetails.type) {
+                    case "application/pdf":
+                      return <BiSolidFilePdf size={50} color="#F40F02" />;
+                    case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                      return <TbFileSpreadsheet size={50} color="#2e7d34" />;
+                    case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                      return <FaFileWord size={50} color="#1566b9" />;
+                    default:
+                      return <IoDocumentText size={50} color="white" />;
+                  }
+                })()
+              }
+            </div>
+            }
           </div>
         </div>
       )}

@@ -16,6 +16,10 @@ import ImageDownload from "./downloadImage/Download"
 
 import TypingEffect from "./TypingEffect"
 import Image from "next/image";
+import { BiSolidFilePdf } from "react-icons/bi";
+import { TbFileSpreadsheet } from "react-icons/tb";
+import { FaFileWord } from "react-icons/fa";
+import { IoDocumentText } from "react-icons/io5";
 
 const Messenger = () => {
   const searchParams = useSearchParams();
@@ -24,9 +28,13 @@ const Messenger = () => {
   const aiType = searchParams.get("type");
   const request = searchParams.get("request");
   const response = searchParams.get("response");
+  const previouslyUploadedFileUrl = searchParams.get("fileUrl");
+
+  // const sentTextValue = JSON.stringify()//!-----Wokrng Here for file url
 
   const router = useRouter();
-  const [messages, setMessages] = useState([{ type: "sent", text: request }, { type: "recieved", text: response }]);
+  // const [messages, setMessages] = useState([{ type: "sent", fileUrl: previouslyUploadedFileUrl, text: request }, { type: "recieved", text: response }]);
+  const [messages, setMessages] = useState([{ type: "sent", fileUrl: previouslyUploadedFileUrl, text: request }, { type: "recieved", text: response }]);
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [stopTyping, setStopTyping] = useState(false); // State to control stopping
@@ -112,6 +120,11 @@ const Messenger = () => {
                 if (typeof msg.text !== "string") return
                 const url = (msg.text && typeof msg.text == "string") && msg.text.match(/https?:\/\/[^"]+/);
                 const youtubeUrl = url && url[0].includes("https://www.youtube.com")
+                let fileDetails = {}
+                try {
+                  fileDetails = JSON.parse(msg.text)
+                } catch { }
+
                 return (
                   <div
                     className={`flex  ${msg.type == "sent" ? "justify-end" : "justify-start"
@@ -131,7 +144,49 @@ const Messenger = () => {
                         {/* </a> */}
                         <ImageDownload imageUrl={url[0]} />
                       </div>
-                    ) : (
+                    ) : Object.keys(fileDetails).length > 0 ? <div>
+                      {(() => {
+                        switch (fileDetails.type) {
+                          case "application/pdf":
+                            return (
+                              <div className=" flex gap-2 px-2 py-1 rounded-[12px] border border-slate-600">
+                                <BiSolidFilePdf size={50} color="#F40F02" />
+                                <div className="flex flex-col">
+                                  <p className=" text-base">{fileDetails.name}</p>
+                                  <p className=" text-xs font-light">PDF</p>
+                                </div>
+                              </div>);
+                          case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                            return (
+                              <div className=" flex gap-2 px-2 py-1 rounded-[12px] border border-slate-600">
+                                <TbFileSpreadsheet size={50} color="#2e7d34" />
+                                <div className="flex flex-col">
+                                  <p className=" text-base">{fileDetails.name}</p>
+                                  <p className=" text-xs font-light">Spreadsheet</p>
+                                </div>
+                              </div>)
+                          case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                            return (
+                              <div className=" flex gap-2 px-2 py-1 rounded-[12px] border border-slate-600">
+                                < FaFileWord size={50} color="#1566b9" />
+                                <div className="flex flex-col">
+                                  <p className=" text-base">{fileDetails.name}</p>
+                                  <p className=" text-xs font-light">Word</p>
+                                </div>
+                              </div>)
+                          default:
+                            return (
+                              <div className=" flex gap-2 px-2 py-1 rounded-[12px] border border-slate-600">
+                                <IoDocumentText size={50} color="white" />
+                                <div className="flex flex-col">
+                                  <p className=" text-base">{fileDetails.name}</p>
+                                  <p className=" text-xs font-light">TEXT</p>
+                                </div>
+                              </div>
+                            )
+                        }
+                      })()}
+                    </div> : (
                       <Typography
                         // key={index}
                         variant="body1"

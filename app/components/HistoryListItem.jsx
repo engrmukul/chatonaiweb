@@ -89,8 +89,8 @@ const HistoryListItem = () => {
 
 
 
-    const handleNavigate = ({ id, aiType, request, response }) => {
-        router.push(`/app/chats/${id}?id=${id}&type=${aiType}&request=${request}&response=${response}`);
+    const handleNavigate = ({ id, aiType, request, response, uploadedFileUrl }) => {
+        router.push(`/app/chats/${id}?id=${id}&type=${aiType}&request=${request}&response=${response}&fileUrl=${uploadedFileUrl}`);
     }
 
     return (
@@ -106,7 +106,7 @@ const HistoryListItem = () => {
                             key={index}
                             className=' hover:cursor-pointer'
                             onClick={() => handleNavigate({
-                                id: item.promptId._id, aiType: item.promptId.aiType, request: item.request, response: item.response
+                                id: item.promptId._id, aiType: item.promptId.aiType, request: item.request, response: item.response, uploadedFileUrl: item.uploadedFileUrl
                             })}>
                             <Box className='info' >
                                 <ListItemText className={'title'} primary={item.promptId.title} />
