@@ -64,7 +64,6 @@ const ImageDownload = ({ imageUrl, fileName }) => {
                 files: [file],
             });
 
-            console.log("Image shared successfully!");
         } catch (error) {
             console.error("Error sharing the image:", error);
         }

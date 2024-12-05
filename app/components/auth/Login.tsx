@@ -28,10 +28,12 @@ export default function Login() {
         "http://185.164.111.200:3001/api/auth/signin",
         data
       );
+
       // const response = await axios.post(
       //   "http://localhost:3001/api/auth/signin",
       //   data
       // );
+
       localStorage.setItem("authToken", response.data.token);
 
       router.push("app/chats");

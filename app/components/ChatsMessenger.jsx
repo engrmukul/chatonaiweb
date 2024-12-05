@@ -20,24 +20,31 @@ import { BiSolidFilePdf } from "react-icons/bi";
 import { TbFileSpreadsheet } from "react-icons/tb";
 import { FaFileWord } from "react-icons/fa";
 import { IoDocumentText } from "react-icons/io5";
+import useFetchData from "../library/hooks/useFetchData";
+import { endpoints } from "../library/share/endpoints";
 
 const Messenger = () => {
   const searchParams = useSearchParams();
-  const id = searchParams.get("id");
-  const prompt = searchParams.get("prompt");
-  const aiType = searchParams.get("type");
-  const request = searchParams.get("request");
-  const response = searchParams.get("response");
-  const previouslyUploadedFileUrl = searchParams.get("fileUrl");
-
-  // const sentTextValue = JSON.stringify()//!-----Wokrng Here for file url
+  const historyId = searchParams.get("historyId");
 
   const router = useRouter();
   // const [messages, setMessages] = useState([{ type: "sent", fileUrl: previouslyUploadedFileUrl, text: request }, { type: "recieved", text: response }]);
-  const [messages, setMessages] = useState([{ type: "sent", fileUrl: previouslyUploadedFileUrl, text: request }, { type: "recieved", text: response }]);
+  const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [stopTyping, setStopTyping] = useState(false); // State to control stopping
+
+  const { data: historyData, isLoading: historyLoading, refetch } = useFetchData(endpoints.getHistoryById.concat(`/${historyId}`))
+
+  useEffect(() => {
+    if (!historyLoading && historyData) {
+      const { fileId, request, response } = historyData?.data[0]
+      const fileInfo = { name: fileId?.originalname, type: fileId?.mimetype }
+      const fileInfoString = (fileInfo.name && fileInfo.type) ? JSON.stringify(fileInfo) : null;
+      setMessages((pre) => [...pre, { type: "sent", text: fileInfoString }, { type: "sent", text: request }, { type: "recieved", text: response }])
+    }
+    return () => { setMessages([]) }
+  }, [historyLoading])
 
   const handleSend = (message) => {
     setMessages((prevMessages) => [...prevMessages, message]);
@@ -124,7 +131,6 @@ const Messenger = () => {
                 try {
                   fileDetails = JSON.parse(msg.text)
                 } catch { }
-
                 return (
                   <div
                     className={`flex  ${msg.type == "sent" ? "justify-end" : "justify-start"
@@ -144,7 +150,7 @@ const Messenger = () => {
                         {/* </a> */}
                         <ImageDownload imageUrl={url[0]} />
                       </div>
-                    ) : Object.keys(fileDetails).length > 0 ? <div>
+                    ) : Object.keys(fileDetails).length > 0 ? <>
                       {(() => {
                         switch (fileDetails.type) {
                           case "application/pdf":
@@ -186,7 +192,7 @@ const Messenger = () => {
                             )
                         }
                       })()}
-                    </div> : (
+                    </> : (
                       <Typography
                         // key={index}
                         variant="body1"

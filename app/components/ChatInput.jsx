@@ -147,6 +147,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                       aiType == AiType.FILES
                         ? response.data.filename
                         : response.data.url,
+                    fileId: response.data._id
                   },
                   headers: {
                     Authorization: `Bearer ${userToken}`,
