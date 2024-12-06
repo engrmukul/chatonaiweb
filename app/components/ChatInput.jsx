@@ -10,8 +10,10 @@ import {
   Typography,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import StopIcon from '@mui/icons-material/Stop';
-import usePostData, { cancelPostDataRequest } from "../library/hooks/usePostData";
+import StopIcon from "@mui/icons-material/Stop";
+import usePostData, {
+  cancelPostDataRequest,
+} from "../library/hooks/usePostData";
 import { endpoints } from "../library/share/endpoints";
 import { getJwtToken } from "../library/functions";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
@@ -26,8 +28,15 @@ import { TbFileSpreadsheet } from "react-icons/tb";
 import { FaFileWord } from "react-icons/fa";
 import { IoDocumentText } from "react-icons/io5";
 
-const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTyping, setIsTyping, handleStopTyping }) => {
-
+const ChatInput = ({
+  onSend,
+  searchParams,
+  setIsLoading,
+  isResponseLoading,
+  isTyping,
+  setIsTyping,
+  handleStopTyping,
+}) => {
   const customPrompt = searchParams.get("prompt");
   const promptId = searchParams.get("id");
   const aiType = searchParams.get("type");
@@ -70,14 +79,14 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
     (item) => item.aiType == AiType.IMAGETOTEXT
   );
 
-
   const handleChange = (event) => {
-    setError(false)
+    setError(false);
     setMessage(event.target.value);
   };
 
   const validateYouTubeLink = (message) => {
-    const youtubeRegex = /^(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S+?[?&]v=|.*[?&]v=)([A-Za-z0-9_-]+)|youtu\.be\/([A-Za-z0-9_-]+)))/;
+    const youtubeRegex =
+      /^(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S+?[?&]v=|.*[?&]v=)([A-Za-z0-9_-]+)|youtu\.be\/([A-Za-z0-9_-]+)))/;
     return youtubeRegex.test(message);
   };
 
@@ -86,12 +95,12 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
     if (aiType === AiType.YOUTUBE_LINK) {
       if (validateYouTubeLink(message)) {
       } else {
-        setError(true)
+        setError(true);
         return;
       }
     }
 
-    setIsTyping(true)
+    setIsTyping(true);
 
     if (
       aiType == AiType.IMAGETOTEXT ||
@@ -118,13 +127,14 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
               // });
               if (aiType == AiType.IMAGETOTEXT) {
                 onSend({
-                  type: "sent", text: response.data.url
+                  type: "sent",
+                  text: response.data.url,
                 });
               } else if (file && !file.type.startsWith("image/")) {
-                onSend({ type: "sent", text: JSON.stringify(fileDetails) })
+                onSend({ type: "sent", text: JSON.stringify(fileDetails) });
               }
               onSend({ type: "sent", text: message });
-              setIsLoading(true)
+              setIsLoading(true);
               setImagePreview(null); //Removing file after upload
               setFileIcon(false);
               setFile(null); //Removing file after upload
@@ -133,12 +143,12 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                   data: {
                     customPrompt:
                       aiType == AiType.TRANSLATION ||
-                        aiType == AiType.SUMMARIZATION
+                      aiType == AiType.SUMMARIZATION
                         ? ImageToTextPromt.prompt
                         : message,
                     promptId:
                       aiType == AiType.TRANSLATION ||
-                        aiType == AiType.SUMMARIZATION
+                      aiType == AiType.SUMMARIZATION
                         ? ImageToTextPromt._id
                         : promptId,
                     stream: false,
@@ -147,7 +157,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                       aiType == AiType.FILES
                         ? response.data.filename
                         : response.data.url,
-                    fileId: response.data._id
+                    fileId: response.data._id,
                   },
                   headers: {
                     Authorization: `Bearer ${userToken}`,
@@ -155,7 +165,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                 },
                 {
                   onSuccess: (response) => {
-                    setIsLoading(false)
+                    setIsLoading(false);
                     if (
                       (aiType == AiType.TRANSLATION ||
                         aiType == AiType.SUMMARIZATION) &&
@@ -186,11 +196,16 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                     }
                   },
                   onError: (error) => {
-                    setIsLoading(false)
+                    setIsLoading(false);
                     // onSend("ME: " + customPrompt);
                     // onSend("ME: " + message);
                     // onSend("AI: " + error);
-                    onSend({ type: "recieved", text: error.response.data.message });
+                    const errorMessage = error.response.data.message.startsWith(
+                      "429"
+                    )
+                      ? "File size too high to process"
+                      : error.response.data.message;
+                    onSend({ type: "recieved", text: errorMessage });
                   },
                 }
               );
@@ -198,22 +213,22 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
               // }
             },
             onError: (error) => {
-              setIsLoading(false)
-              onSend({ type: "recieved", text: error.response.data.message })
+              setIsLoading(false);
+              onSend({ type: "recieved", text: error.response.data.message });
               setMessage("");
               console.log("file___ERROR", error);
             },
           }
         );
       } catch (error) {
-        setIsLoading(false)
+        setIsLoading(false);
         console.error("Error uploading file", error);
       }
     } else {
       try {
         if (message.trim()) {
           !isSecondCall && onSend({ type: "sent", text: message });
-          setIsLoading(true)
+          setIsLoading(true);
           mutate(
             {
               data: {
@@ -232,7 +247,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
             },
             {
               onSuccess: (response) => {
-                setIsLoading(false)
+                setIsLoading(false);
                 if (response.message.text) {
                   onSend({ type: "recieved", text: response.message.text });
                 } else if (response.message.summeriz) {
@@ -247,7 +262,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                 }
               },
               onError: (error) => {
-                setIsLoading(false)
+                setIsLoading(false);
                 // onSend("ME: " + customPrompt);
                 // onSend("ME: " + message);
                 // onSend("AI: " + error);
@@ -258,7 +273,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
           setMessage("");
         }
       } catch (error) {
-        setIsLoading(false)
+        setIsLoading(false);
         console.error(error);
       }
     }
@@ -288,7 +303,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
       } else {
         setImagePreview(null); // Clear preview if not an image
         setFileIcon(true);
-        setFileDetails({ name: file.name, type: file.type })
+        setFileDetails({ name: file.name, type: file.type });
       }
     }
   };
@@ -345,8 +360,8 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
   };
 
   const cancelRequest = () => {
-    cancelPostDataRequest()
-  }
+    cancelPostDataRequest();
+  };
 
   // application/pdf
   // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
@@ -366,7 +381,6 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
   //   default:
   //     <IoDocumentText size={50} color="black" />
   // }
-
 
   return (
     <Box className={"message-input relative"}>
@@ -404,9 +418,9 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                 alt="Preview"
                 style={{ maxWidth: "100%", maxHeight: 50, borderRadius: 8 }}
               />
-            ) : <div className="w-fit h-fit">
-              {
-                (() => {
+            ) : (
+              <div className="w-fit h-fit">
+                {(() => {
                   switch (fileDetails.type) {
                     case "application/pdf":
                       return <BiSolidFilePdf size={50} color="#F40F02" />;
@@ -417,10 +431,9 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                     default:
                       return <IoDocumentText size={50} color="white" />;
                   }
-                })()
-              }
-            </div>
-            }
+                })()}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -452,14 +465,14 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                 aiType === AiType.FILES ||
                 aiType === AiType.TRANSLATION ||
                 aiType == AiType.SUMMARIZATION) && (
-                  <IconButton
-                    edge="start"
-                    color="primary"
-                    onClick={handleAttachFileClick}
-                  >
-                    <AttachFileIcon />
-                  </IconButton>
-                )}
+                <IconButton
+                  edge="start"
+                  color="primary"
+                  onClick={handleAttachFileClick}
+                >
+                  <AttachFileIcon />
+                </IconButton>
+              )}
             </InputAdornment>
           ),
 
@@ -494,22 +507,28 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
                   <IoMdMicOff />
                 </IconButton>
               )}
-              {!isTyping || (aiType == AiType.IMAGES && !isResponseLoading) ? (<IconButton
-                edge="end"
-                color="primary"
-                onClick={() => { message != "" && handleSend(false) }}
-              >
-                <SendIcon />
-              </IconButton>)
-                :
-                (<IconButton
+              {!isTyping || (aiType == AiType.IMAGES && !isResponseLoading) ? (
+                <IconButton
                   edge="end"
                   color="primary"
-                  onClick={() => { cancelRequest(); handleStopTyping() }}
+                  onClick={() => {
+                    message != "" && handleSend(false);
+                  }}
+                >
+                  <SendIcon />
+                </IconButton>
+              ) : (
+                <IconButton
+                  edge="end"
+                  color="primary"
+                  onClick={() => {
+                    cancelRequest();
+                    handleStopTyping();
+                  }}
                 >
                   <StopIcon />
-                </IconButton>)
-              }
+                </IconButton>
+              )}
             </InputAdornment>
           ),
         }}
@@ -524,7 +543,7 @@ const ChatInput = ({ onSend, searchParams, setIsLoading, isResponseLoading, isTy
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
-    </Box >
+    </Box>
     // <VoiceToText />
   );
 };
